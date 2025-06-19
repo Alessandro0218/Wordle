@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "angular-start",
+            "type": "shell",
+            "command": "ng serve",
+            "options": {
+                "cwd": "${workspaceFolder}/frontend/wordui"
+            },
+            "problemMatcher": {
+                "owner": "typescript",
+                "pattern": {
+                    "regexp": ".*",
+                    "file": 1,
+                    "location": 2,
+                    "message": 3
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".*bundle generation complete.*",
+                    "endsPattern": ".*Initial chunk files.*"
+                }
+            },
+            "isBackground": true,
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
+        {
+            "label": "angular-stop",
+            "type": "shell",
+            "command": "echo Stopping Angular (VS Code handles it automatically)",
+            "problemMatcher": []
+        }
+    ]
+}

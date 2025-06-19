@@ -1,0 +1,23 @@
+/* You can add global styles to this file, and also import other style files */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --color-present: #b59f3b;
+    --color-correct: #538d4e;
+    --color-absent: #3a3a3c;
+    --color-danger: #e0303b;
+    --tile-text-color: #f8f8f8;
+    --background: #151515;
+    --border: #3a3a3c;
+
+    --keyboard-background: #818384;
+}

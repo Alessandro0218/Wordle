@@ -1,0 +1,35 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "⚙️backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "backend.app:app",
+                "--reload"
+            ],
+            "cwd": "${workspaceFolder}",
+            "jinja": true
+        },
+        {
+            "name": "🚀frontend",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:4200",
+            "webRoot": "${workspaceFolder}/frontend/wordui",
+            "preLaunchTask": "angular-start",
+            "postDebugTask": "angular-stop",
+        }
+    ],
+    "compounds": [
+        {
+            "name": "🧪 All: frontend + backend",
+            "configurations": [
+                "⚙️backend",
+                "🚀frontend"
+            ]
+        }
+    ]
+}
