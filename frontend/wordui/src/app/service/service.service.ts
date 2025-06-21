@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { catchError, map, Observable, of, Subject, timeout } from 'rxjs';
+import { Router } from '@angular/router';
 
 export enum GameChangedEvent {
   StartSuccess,
@@ -29,10 +30,18 @@ export class GameService {
   private DEFAULT_TIMEOUT = 5000;
   private onDataChangedEvent: Subject<GameChangedResult> = new Subject<GameChangedResult>();
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) { }
   
   onDataChanged(): Observable<GameChangedResult> {
     return this.onDataChangedEvent.asObservable();
+  }
+
+  login() {
+    const url = `${environment.HOST}:${environment.PORT}/auth/discord/login`;
+    window.location.href = url;
   }
 
   postStart(timeoutValue: number = this.DEFAULT_TIMEOUT): void {

@@ -206,4 +206,8 @@ export class AppComponent implements OnInit {
   trackByFn(index: number) {
     return index;
   }
+
+  requestLogin() {
+    this.gameService.login();
+  }
 }
