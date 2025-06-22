@@ -1,8 +1,10 @@
 import { AfterViewInit, Component, Host, HostListener, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { GameChangedEvent, GameService } from './service/service.service';
+import { GameChangedEvent, GameService } from './service/game.service';
 import { Game, Guess, WordStatus } from './domain/game';
 import { CommonModule } from '@angular/common';
+import { AuthChangedEvent, AuthChangedResult, AuthService } from './service/auth.service';
+import { User } from './domain/user';
 
 @Component({
   selector: 'app-root',
@@ -39,8 +41,11 @@ export class AppComponent implements OnInit {
 
   game: Game = new Game();
 
+  userData: User = new User();
+
   constructor(
     private gameService: GameService,
+    private authService: AuthService,
   ) {}
 
   get currentIndex() {
@@ -117,6 +122,16 @@ export class AppComponent implements OnInit {
         console.error('Error in game service:', error);
       }
     });
+
+    this.authService.onDataChanged().subscribe((AuthChangedResult) => {
+      if (AuthChangedResult.event === AuthChangedEvent.UserDataFetched) {
+        this.userData = new User().fromJson(AuthChangedResult.data);
+      } else if (AuthChangedResult.event === AuthChangedEvent.UserDataError) {
+        console.error('Error fetching user data:', AuthChangedResult.data);
+      }
+    });
+
+    this.authService.fetchUserData();
   }
 
   emulateKeydown(key: string) {
@@ -205,5 +220,9 @@ export class AppComponent implements OnInit {
 
   trackByFn(index: number) {
     return index;
+  }
+
+  requestLogin() {
+    this.authService.login();
   }
 }
