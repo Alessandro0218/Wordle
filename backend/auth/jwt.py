@@ -17,11 +17,14 @@ def decode_jwt_token(token: str) -> dict:
     return jwt.decode(jwt=token, key=secret, algorithms="HS256")
 
 
-def verify_jwt_token(token: str) -> bool:
+def verify_jwt_token(token: str) -> dict | None:
     try:
-        decode_jwt_token(token)
-        return True
+        return decode_jwt_token(token)
     except jwt.ExpiredSignatureError:
-        return False
+        return None
     except jwt.InvalidTokenError:
-        return False
+        return None
+
+
+def check_token_middleware(token: str) -> bool:
+    return verify_jwt_token(token) is not None

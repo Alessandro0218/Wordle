@@ -34,6 +34,16 @@ class Database:
         finally:
             self.close_session(session)
 
+    def get_user_by_id(self, user_id: int) -> UserORM | None:
+        session = self.get_session()
+        try:
+            user = session.query(UserORM).filter(UserORM.id == user_id).first()
+            return user
+        except Exception as e:
+            raise e
+        finally:
+            self.close_session(session)
+
     def create_user(
         self,
         discord_id: str,

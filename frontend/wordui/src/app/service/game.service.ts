@@ -32,16 +32,10 @@ export class GameService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
   ) { }
   
   onDataChanged(): Observable<GameChangedResult> {
     return this.onDataChangedEvent.asObservable();
-  }
-
-  login() {
-    const url = `${environment.HOST}:${environment.PORT}/auth/discord/login`;
-    window.location.href = url;
   }
 
   postStart(timeoutValue: number = this.DEFAULT_TIMEOUT): void {
@@ -91,8 +85,6 @@ export class GameService {
       }
     });
   }
-
-  /* REQUESTS */
 
   private postStartRequest(timeoutValue: number): Observable<GameChangedResult> {
     const url = `${environment.HOST}:${environment.PORT}/start`;
