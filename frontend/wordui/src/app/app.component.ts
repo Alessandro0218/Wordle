@@ -24,20 +24,13 @@ export class AppComponent implements OnInit {
   presentLetters: string[] = [];
   absentLetters: string[] = [];
 
-  /* game: FormGroup = new FormGroup({
-    currentGuess: new FormControl('', [Validators.required, Validators.minLength(this.MAX_LENGTH), Validators.maxLength(this.MAX_LENGTH)]),
-    currentIndex: new FormControl(0),
-    game_id: new FormControl(''),
-    game_status: new FormControl(0),
-    guesses: new FormControl<Array<Guess>>(
-      Array.from({ length: this.MAX_GUESSES }, () => new Guess(' '.repeat(this.MAX_LENGTH), Array(this.MAX_LENGTH).fill(0))),
-      [Validators.required]
-    )
-  }); */
-
   word: string = '';
 
   game: Game = new Game();
+
+  userData: User = new User();
+
+  shakeAnimation = false;
 
   constructor(
     private gameService: GameService,
@@ -106,6 +99,10 @@ export class AppComponent implements OnInit {
           this.startGame();
         } else if (result.event === GameChangedEvent.WordNotValid) {
           console.error('Submitted word is not valid:', result.data);
+          this.shakeAnimation = true;
+          setTimeout(() => {
+            this.shakeAnimation = false;
+          }, 500);
         } else if (result.event === GameChangedEvent.StartError) {
           console.error('Error starting game:', result.data);
         }
