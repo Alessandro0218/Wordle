@@ -1,6 +1,7 @@
 import uuid
 from enum import Enum
 
+from backend.auth.domain import GameErrorType
 from backend.game.wordlist import (
     WordStatus,
     evaluate_guess,
@@ -44,7 +45,7 @@ class GameEngine:
             raise ValueError("Game is not ongoing")
 
         if not is_valid_word(guess):
-            raise ValueError("Invalid word guess")
+            raise ValueError(GameErrorType.INVALID_WORD)
 
         result = evaluate_guess(guess, self.word)
         self.guesses.append(Guess(guess, result))

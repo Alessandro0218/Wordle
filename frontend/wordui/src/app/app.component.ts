@@ -5,6 +5,7 @@ import { Game, Guess, WordStatus } from './domain/game';
 import { CommonModule } from '@angular/common';
 import { AuthChangedEvent, AuthChangedResult, AuthService } from './service/auth.service';
 import { User } from './domain/user';
+import { WebSocketService } from './service/websocket.service';
 
 @Component({
   selector: 'app-root',
@@ -37,6 +38,7 @@ export class AppComponent implements OnInit {
   constructor(
     private gameService: GameService,
     private authService: AuthService,
+    private wsService: WebSocketService,
   ) {}
 
   get currentIndex() {
@@ -73,9 +75,10 @@ export class AppComponent implements OnInit {
     const gameId = localStorage.getItem('game_id');
     if (gameId) {
       this.game.GameId = gameId;
-      this.gameService.fetchStatus(this.game.GameId);
+      this.wsService.connect(this.game.GameId);
     } else {
       console.log('No game ID found in localStorage, starting a new game.');
+      this.startGame();
     }
 
     this.gameService.onDataChanged().subscribe({
@@ -85,7 +88,8 @@ export class AppComponent implements OnInit {
           console.log('Game started successfully:', result.data);
           this.game.fromJson(data);
           if (this.game.GameId) localStorage.setItem('game_id', this.game.GameId);
-        
+          this.wsService.connect(this.game.GameId);
+
         } else if (result.event === GameChangedEvent.GuessSuccess) {
           console.log('Guess submitted successfully:', result.data);
           const data = result.data as Game;
@@ -101,7 +105,6 @@ export class AppComponent implements OnInit {
           console.warn('Game not found, starting a new game.');
           this.startGame();
         } else if (result.event === GameChangedEvent.WordNotValid) {
-          console.error('Submitted word is not valid:', result.data);
           this.shakeAnimation = true;
           setTimeout(() => {
             this.shakeAnimation = false;

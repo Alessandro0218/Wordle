@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { catchError, map, Observable, of, Subject, timeout } from 'rxjs';
-import { Router } from '@angular/router';
+import { GameAction, GameActionPayload, GameActionType, WebSocketService, GameErrorType } from './websocket.service';
+import { Game } from '../domain/game';
 
 export enum GameChangedEvent {
   StartSuccess,
@@ -32,10 +33,51 @@ export class GameService {
 
   constructor(
     private http: HttpClient,
-  ) { }
+    private wsService: WebSocketService,
+  ) {
+    this.wsService.onConnection().subscribe(() => {
+      this.wsService.onMessage().subscribe((msg: GameAction) => this.handleWSMessage(msg));
+    });
+  }
+  
+  ngOnInit(): void {
+  }
   
   onDataChanged(): Observable<GameChangedResult> {
     return this.onDataChangedEvent.asObservable();
+  }
+
+  handleWSMessage(msg: GameAction): void {
+    const result = new GameChangedResult();
+    
+    switch (msg.action) {
+      case GameActionType.STATUS:
+        result.event = GameChangedEvent.StatusSuccess;
+        result.data = new Game().fromJson(msg);
+        this.onDataChangedEvent.next(result);
+        break;
+      case GameActionType.GUESS:
+        result.event = GameChangedEvent.GuessSuccess;
+        result.data = new Game().fromJson(msg);
+        this.onDataChangedEvent.next(result);
+        break;
+      case GameActionType.ERROR:
+        msg.error = parseInt(msg.error?.toString() || '0', 10);
+        switch (msg.error) {
+          case GameErrorType.SESSION_NOT_FOUND:
+            result.event = GameChangedEvent.GameNotFound;
+            break;
+          case GameErrorType.INVALID_WORD:
+            result.event = GameChangedEvent.WordNotValid;
+            break;
+          default:
+            result.event = GameChangedEvent.StartError;
+        }
+        this.onDataChangedEvent.next(result);
+        break;
+      default:
+        console.warn('Unknown action type received:', msg.action);
+    }
   }
 
   postStart(timeoutValue: number = this.DEFAULT_TIMEOUT): void {
@@ -53,37 +95,11 @@ export class GameService {
   }
 
   postGuess(game_id: string, guess: string, timeoutValue: number = this.DEFAULT_TIMEOUT): void {
-    this.postGuessRequest(game_id, guess, timeoutValue).subscribe({
-      next: (result: GameChangedResult) => {
-        if (result.data.status === 400) {
-          result.event = GameChangedEvent.WordNotValid;
-        }
-        this.onDataChangedEvent.next(result);
-      },
-      error: (error: any) => {
-        const result = new GameChangedResult();
-        result.event = GameChangedEvent.GuessError;
-        result.data = error;
-        this.onDataChangedEvent.next(result);
-      }
-    });
+    this.postGuessRequestWS(new GameAction(GameActionType.GUESS, new GameActionPayload(guess)));
   }
 
   fetchStatus(game_id: string, timeoutValue: number = this.DEFAULT_TIMEOUT): void {
-    this.fetchStatusRequest(game_id, timeoutValue).subscribe({
-      next: (result: GameChangedResult) => {
-        if (result.data.status === 404) {
-          result.event = GameChangedEvent.GameNotFound;
-        }
-        this.onDataChangedEvent.next(result);
-      },
-      error: (error: any) => {
-        const result = new GameChangedResult();
-        result.event = GameChangedEvent.StatusError;
-        result.data = error;
-        this.onDataChangedEvent.next(result);
-      }
-    });
+    this.fetchStatusRequestWS();
   }
 
   private postStartRequest(timeoutValue: number): Observable<GameChangedResult> {
@@ -106,49 +122,12 @@ export class GameService {
     );
   }
 
-  private postGuessRequest(game_id: string, guess: string, timeoutValue: number): Observable<GameChangedResult> {
-    const url = `${environment.HOST}:${environment.PORT}/guess`;
-    
-    const body = { 
-      game_id: game_id, 
-      guess: guess 
-    };
-
-    return this.http.post(url, body).pipe(
-      timeout(timeoutValue),
-      map((response: any) => {
-        const result = new GameChangedResult();
-        result.event = GameChangedEvent.GuessSuccess;
-        result.data = response;
-        return result;
-      }),
-      catchError((error: any) => {
-        const result = new GameChangedResult();
-        result.event = GameChangedEvent.GuessError;
-        result.data = error;
-        return of(result);
-      })
-    );
+  private postGuessRequestWS(guessAction: GameAction): void {
+    this.wsService.send(guessAction);
   }
 
-  fetchStatusRequest(game_id: string, timeoutValue: number = this.DEFAULT_TIMEOUT): Observable<GameChangedResult> {
-    const url = `${environment.HOST}:${environment.PORT}/status/${game_id}`;
-    
-    return this.http.get(url).pipe(
-      timeout(timeoutValue),
-      map((response: any) => {
-        const result = new GameChangedResult();
-        result.event = GameChangedEvent.StatusSuccess;
-        result.data = response;
-        return result;
-      }),
-      catchError((error: any) => {
-        const result = new GameChangedResult();
-        result.event = GameChangedEvent.StatusError;
-        result.data = error;
-        return of(result);
-      })
-    );
+  private fetchStatusRequestWS(): void {
+    const statusAction = new GameAction(GameActionType.STATUS);
+    this.wsService.send(statusAction);
   }
-
 }

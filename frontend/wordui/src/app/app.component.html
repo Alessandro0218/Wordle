@@ -10,7 +10,6 @@
     </button>
 </div>
 <div class="container">
-    <button [ngStyle]="{'background-color': game.GameId ? 'var(--color-correct)' : 'var(--color-danger)'}" class="key" (click)="startGame()">START</button>
     <div class="grid" [ngStyle]="{'grid-template-rows': 'repeat(' + MAX_GUESSES + ', 1fr)'}">
         <div 
             class="row" 

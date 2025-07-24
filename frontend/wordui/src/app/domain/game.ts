@@ -1,3 +1,5 @@
+import { GameActionType } from "../service/websocket.service";
+
 export enum GameState {
     ONGOING,
     WON,
@@ -13,15 +15,19 @@ export enum WordStatus {
 }
 
 export class Game {
-    private id: string = '';
+    private action: GameActionType = GameActionType.STATUS;
+    private game_id: string = '';
     private status: GameState = GameState.ONGOING;
     private guesses: Guess[] = [];
     private max_guess: number = 6;
     private current_guess: number = 0;
     private word_length: number = 5;
 
+    get Action(): GameActionType {
+        return this.action;
+    }
     get GameId(): string {
-        return this.id;
+        return this.game_id;
     }
     get GameStatus(): GameState {
         return this.status;
@@ -39,8 +45,11 @@ export class Game {
         return this.word_length;
     }
 
+    set Action(value: GameActionType) {
+        this.action = value;
+    }
     set GameId(value: string) {
-        this.id = value;
+        this.game_id = value;
     }
     set GameStatus(value: GameState) {
         this.status = value;
@@ -80,7 +89,8 @@ export class Game {
     }
 
     fromJson(json: any): Game {
-        this.id = json.game_id;
+        this.action = json.action as GameActionType;
+        this.game_id = json.game_id;
         this.status = json.status as GameState;
         this.max_guess = json.max_guess;
         this.current_guess = json.current_guess;
@@ -88,16 +98,6 @@ export class Game {
             Array.from({ length: this.max_guess - json.guesses.length }, () => new Guess(' '.repeat(this.word_length), Array(this.max_guess).fill(0)))
         );
         return this;
-    }
-
-    toJson(): any {
-        return {
-            game_id: this.id,
-            status: this.status,
-            max_guess: this.max_guess,
-            current_guess: this.current_guess,
-            guesses: this.guesses.map(g => g.toJson())
-        };
     }
 }
 
