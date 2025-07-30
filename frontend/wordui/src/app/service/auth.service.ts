@@ -22,9 +22,13 @@ export class AuthService {
   private DEFAULT_TIMEOUT = 5000;
   private onDataChangedEvent: Subject<AuthChangedResult> = new Subject<AuthChangedResult>();
 
-  id: number | undefined;
-  discord_username: string | undefined;
-  discord_avatar: string | undefined;
+  private id: number | undefined;
+  private discord_username: string | undefined;
+  private discord_avatar: string | undefined;
+
+  get isLoggedIn(): boolean {
+    return this.Id !== undefined && this.DiscordUsername !== undefined && this.DiscordAvatar !== undefined;
+  }
 
   constructor(
     private http: HttpClient,
