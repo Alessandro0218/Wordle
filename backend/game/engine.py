@@ -16,6 +16,12 @@ class GameStatus(Enum):
     LOST = 3
 
 
+class VersusGameStatus(Enum):
+    CREATED = 0
+    IN_PROGRESS = 1
+    FINISHED = 2
+
+
 class Guess:
     def __init__(self, guess: str, result: dict):
         self.guess = guess
@@ -25,6 +31,49 @@ class Guess:
         return {
             "word": self.guess,
             "status": self.result,
+        }
+
+
+class VersusGame:
+    def __init__(self):
+        self.game_id = str(uuid.uuid4())
+        self.status = VersusGameStatus.CREATED
+        self.players = {}
+        self.winner = None
+        self.word = get_random_word()
+
+    def add_player(self, player_name: str):
+        if player_name in self.players:
+            raise ValueError("Player already exists")
+
+        self.players[player_name] = GameEngine()
+        if len(self.players) == 2:
+            self.status = VersusGameStatus.IN_PROGRESS
+
+    def make_guess(self, player: str, guess: str):
+        if self.status != VersusGameStatus.IN_PROGRESS:
+            raise ValueError("Game already finished")
+
+        if player not in self.players:
+            raise ValueError("Invalid player")
+
+        result = self.players[player].make_guess(guess)
+
+        if self.players[player].status == GameStatus.WON:
+            self.status = VersusGameStatus.FINISHED
+            self.winner = player
+
+        elif all(p.status != GameStatus.IN_PROGRESS for p in self.players.values()):
+            self.status = VersusGameStatus.FINISHED
+
+        return result
+
+    def get_status(self):
+        return {
+            "game_id": self.game_id,
+            "status": self.status.value,
+            "winner": self.winner,
+            "players": {name: engine.get_status() for name, engine in self.players.items()},
         }
 
 

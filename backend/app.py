@@ -5,12 +5,12 @@ from fastapi.responses import JSONResponse
 from backend.auth.connections import ConnectionManager
 from backend.auth.domain import GameErrorType
 from backend.auth.routes import router
-from backend.game.session import GameManager
+from backend.game.session import SingleManager
 
 """ dotenv_path = os.path.join(os.path.dirname(__file__), "env", ".env")
 load_dotenv(dotenv_path=dotenv_path) """
 app = FastAPI()
-gameManager = GameManager()
+gameManager = SingleManager()
 connectionManager = ConnectionManager()
 
 app.add_middleware(
@@ -25,7 +25,7 @@ app.include_router(router, prefix="/auth")
 
 
 @app.websocket("/wordle/{game_id}")
-async def websocket_endpoint(websocket: WebSocket):
+async def wordle_socket(websocket: WebSocket):
     game_id = str(websocket.path_params.get("game_id"))
     await connectionManager.connect(game_id, websocket)
 
@@ -69,6 +69,11 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         connectionManager.disconnect(game_id)
+
+
+@app.websocket("/versus/{game_id}")
+async def versus_socket(websocket: WebSocket):
+    pass
 
 
 @app.get("/")
