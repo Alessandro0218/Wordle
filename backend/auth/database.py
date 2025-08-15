@@ -14,7 +14,7 @@ DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB
 
 class Database:
     def __init__(self):
-        self.engine = create_engine(DATABASE_URL, echo=True)
+        self.engine = create_engine(DATABASE_URL, echo=False)
         self.SessionLocal = sessionmaker(bind=self.engine)
         Base.metadata.create_all(bind=self.engine)
 
