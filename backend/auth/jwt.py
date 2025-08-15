@@ -21,9 +21,9 @@ def verify_jwt_token(token: str) -> dict | None:
     try:
         return decode_jwt_token(token)
     except jwt.ExpiredSignatureError:
-        return None
+        raise ValueError("Token has expired")
     except jwt.InvalidTokenError:
-        return None
+        raise ValueError("Invalid token")
 
 
 def check_token_middleware(token: str) -> bool:

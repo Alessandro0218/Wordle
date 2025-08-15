@@ -4,6 +4,7 @@ import requests
 from fastapi.responses import RedirectResponse
 
 from backend.auth.database import Database
+from backend.auth.domain import User
 from backend.auth.jwt import create_jwt_token, verify_jwt_token
 
 
@@ -71,7 +72,7 @@ def callbackLogic(code: str):
     return response
 
 
-def get_user_data_from_token(token: str):
+def get_user_data_from_token(token: str) -> User:
     user_data = verify_jwt_token(token)
     if not user_data:
         raise ValueError("Invalid or expired token")
@@ -79,9 +80,5 @@ def get_user_data_from_token(token: str):
     user = db.get_user_by_id(user_data["user_id"])
     if not user:
         raise ValueError("User not found")
-    return {
-        "id": user.id,
-        "discord_id": user.discord_id,
-        "discord_username": user.discord_username,
-        "discord_avatar": user.discord_avatar,
-    }
+
+    return User(**user.__dict__)

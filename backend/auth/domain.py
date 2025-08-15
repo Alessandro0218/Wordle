@@ -1,13 +1,21 @@
+import json
 from enum import IntEnum
 
+from pydantic import BaseModel
 
-class User:
+
+class User(BaseModel):
     id: int
     discord_id: str
     discord_username: str
     discord_avatar: str
-    discord_token: str | None
-    discord_refresh_token: str | None
+
+    @classmethod
+    def from_json(cls, json_str: str):
+        return cls(**json.loads(json_str))
+
+    def to_json(self) -> str:
+        return self.model_dump_json()
 
 
 class GameErrorType(IntEnum):

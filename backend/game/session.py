@@ -1,3 +1,5 @@
+from backend.auth.domain import User
+from backend.auth.service import get_user_data_from_token
 from backend.game.engine import GameEngine, VersusGame
 
 
@@ -27,10 +29,21 @@ class VersusManager:
     def __init__(self):
         self.sessions: dict[str, VersusGame] = {}
 
-    def create_session(self, same_word=True):
-        session = VersusGame(players, same_word=same_word)
+    def create_session(self, owner: User):
+        session = VersusGame(owner)
         self.sessions[session.game_id] = session
         return session.get_status()
+
+    def join_session(self, user_token: str, game_id: str):
+        session = self.sessions.get(game_id)
+        if not session:
+            return
+        try:
+            user = get_user_data_from_token(user_token)
+            if user:
+                session.add_player(user)
+        except Exception as e:
+            raise e
 
     def get_session(self, game_id: str) -> VersusGame | None:
         return self.sessions.get(game_id)
