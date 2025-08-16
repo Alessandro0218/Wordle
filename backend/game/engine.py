@@ -26,6 +26,7 @@ class PlayerState:
     def __init__(self, player: str, defined_word: str | None = None):
         self._player_id = player
         self._ready: bool = False
+        self._online: bool = False
         self._game: GameEngine = GameEngine(defined_word)
 
     @property
@@ -41,6 +42,14 @@ class PlayerState:
         self._ready = state
 
     @property
+    def online(self):
+        return self._online
+
+    @online.setter
+    def online(self, state: bool):
+        self._online = state
+
+    @property
     def game(self):
         return self._game
 
@@ -49,7 +58,7 @@ class PlayerState:
         self._game = game
 
     def toJson(self):
-        return {"player_id": self.player_id, "ready": self.ready, "game": self.game.get_status()}
+        return {"player_id": self.player_id, "ready": self.ready, "online": self.online, "game": self.game.get_status()}
 
 
 class Guess:
@@ -74,9 +83,13 @@ class VersusGame:
         self.word: str = get_random_word()
         self.max_players: int = max_player
 
+    def start(self):
+        self.status = VersusGameStatus.IN_PROGRESS
+        return self.get_status()
+
     def add_player(self, player: User):
-        if player.discord_id in self.players:
-            raise ValueError("Player already exists")
+        if player.discord_id in [p.player_id for p in self.players]:
+            raise ValueError(GameErrorType.PLAYER_ALREADY_EXISTS)
 
         self.players.append(PlayerState(player.discord_id, self.word))
 
@@ -87,7 +100,6 @@ class VersusGame:
         if player not in self.players:
             raise ValueError("Invalid player")
 
-        # game = self.players[player.discord_id].game
         game = next(list(filter(lambda user: user.player_id == player.discord_username, self.players)))
         result = game.make_guess(guess)
 

@@ -22,3 +22,5 @@ class GameErrorType(IntEnum):
     GENERAL_ERROR = 0
     SESSION_NOT_FOUND = 1
     INVALID_WORD = 2
+    PLAYER_ALREADY_EXISTS = 3
+    NOT_SESSION_OWNER = 4

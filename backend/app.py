@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from backend.auth.connections import ConnectionManager
-from backend.auth.domain import GameErrorType
-from backend.auth.jwt import verify_jwt_token
+from backend.auth.domain import GameErrorType, User
+from backend.auth.jwt import create_jwt_token, verify_jwt_token
 from backend.auth.routes import router
 from backend.auth.service import get_user_data_from_token
 from backend.game.session import SingleManager, VersusManager
@@ -43,15 +43,14 @@ async def versus_socket(websocket: WebSocket):
 
     try:
         verify_jwt_token(token)
+        user = get_user_data_from_token(token)
     except Exception as e:
         await websocket.send_json({"action": "error", "error": str(e)})
         await websocket.close()
         return
 
     session = versusManager.get_session(game_id)
-    if session:
-        await websocket.send_json({"action": "status", **session.get_status()})
-    else:
+    if not session:
         await websocket.send_json({"action": "error", "error": GameErrorType.SESSION_NOT_FOUND})
         await websocket.close()
         return
@@ -68,7 +67,23 @@ async def versus_socket(websocket: WebSocket):
     try:
         while True:
             data = await websocket.receive_json()
-            print(data)
+            action = data.get("action")
+            payload = data.get("data", {})
+
+            if action == "guess":
+                try:
+                    session.make_guess(user, payload.get("guess"))
+                    await websocket.send_json({"action": "guess", **session.get_status()})
+                except ValueError as e:
+                    await websocket.send_json({"action": "error", "error": str(e)})
+                    await websocket.close()
+                    return
+
+            elif action == "status":
+                await websocket.send_json({"action": "status", **session.get_status()})
+
+            else:
+                await websocket.send_json({"action": "error", "message": f"Unknown action: {action}"})
 
     except WebSocketDisconnect:
         connectionManager.disconnect(game_id)
@@ -81,9 +96,23 @@ def create_room(request: Request):
         verify_jwt_token(token)
         user = get_user_data_from_token(token)
     except Exception as e:
-        print(f"Error verifying token: {e}")
-        return JSONResponse(status_code=401, content={"error": "Invalid token"})
+        return JSONResponse(status_code=401, content={"error": str(e)})
     session = versusManager.create_session(user)
+    return session
+
+
+@app.post("/versus/start")
+def start_game(request: Request, game_id: str):
+    token = str(request.cookies.get("user_token", None))
+    try:
+        verify_jwt_token(token)
+        user = get_user_data_from_token(token)
+    except Exception as e:
+        return JSONResponse(status_code=401, content={"error": str(e)})
+    try:
+        session = versusManager.start_session(user, game_id)
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"error": str(e)})
     return session
 
 
@@ -165,3 +194,18 @@ def remove_all_sessions():
 @app.get("/health")
 def health_check():
     return JSONResponse(status_code=200, content={"status": "ok", "message": "Server is running"})
+
+
+# Debug
+
+
+@app.post("/token")
+def create_token(user: User):
+    token = create_jwt_token(
+        {
+            "user_id": user.id,
+            "discord_username": user.discord_username,
+            "discord_avatar": user.discord_avatar,
+        }
+    )
+    return {"token": token}

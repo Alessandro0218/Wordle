@@ -1,4 +1,4 @@
-from backend.auth.domain import User
+from backend.auth.domain import GameErrorType, User
 from backend.auth.service import get_user_data_from_token
 from backend.game.engine import GameEngine, VersusGame
 
@@ -33,6 +33,15 @@ class VersusManager:
         session = VersusGame(owner)
         self.sessions[session.game_id] = session
         return session.get_status()
+
+    def start_session(self, user: User, game_id: str):
+        session = self.sessions.get(game_id)
+        if not session:
+            raise ValueError(GameErrorType.SESSION_NOT_FOUND)
+        if session.owner == user:
+            return session.start()
+        else:
+            raise ValueError(GameErrorType.NOT_SESSION_OWNER)
 
     def join_session(self, user_token: str, game_id: str):
         session = self.sessions.get(game_id)
