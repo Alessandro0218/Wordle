@@ -1,6 +1,26 @@
 from typing import Dict
 
 from fastapi import WebSocket
+from starlette.authentication import AuthCredentials, AuthenticationBackend
+
+from backend.auth.domain import AuthenticatedUser
+from backend.auth.jwt import verify_jwt_token
+from backend.auth.service import get_user_data_from_token
+
+
+class JWTAuthBackend(AuthenticationBackend):
+    async def authenticate(self, conn):
+        token = conn.cookies.get("user_token")
+        if not token:
+            return None
+
+        try:
+            verify_jwt_token(token)
+            user_data = get_user_data_from_token(token)
+        except Exception:
+            return None
+
+        return AuthCredentials(["authenticated"]), AuthenticatedUser(user_data)
 
 
 class ConnectionManager:
@@ -10,6 +30,9 @@ class ConnectionManager:
     async def connect(self, game_id: str, websocket: WebSocket):
         await websocket.accept()
         self.active_connections[game_id] = websocket
+
+    def get_connections(self, game_id: str):
+        return [conn for gid, conn in self.active_connections.items() if gid == game_id]
 
     def disconnect(self, game_id: str):
         self.active_connections.pop(game_id, None)

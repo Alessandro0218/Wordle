@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.authentication import AuthenticationMiddleware
 
-from backend.auth.connections import ConnectionManager
+from backend.auth.connections import ConnectionManager, JWTAuthBackend
 from backend.auth.domain import GameErrorType, User
 from backend.auth.jwt import create_jwt_token, verify_jwt_token
 from backend.auth.routes import router
@@ -25,6 +26,9 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/auth")
+
+
+app.add_middleware(AuthenticationMiddleware, backend=JWTAuthBackend())
 
 
 @app.get("/")
@@ -62,7 +66,7 @@ async def versus_socket(websocket: WebSocket):
         await websocket.close()
         return
 
-    await websocket.send_json({"action": "status", **session.get_status()})
+    await websocket.send_json({"action": "status", **session.get_status(user)})
 
     try:
         while True:
@@ -73,14 +77,20 @@ async def versus_socket(websocket: WebSocket):
             if action == "guess":
                 try:
                     session.make_guess(user, payload.get("guess"))
-                    await websocket.send_json({"action": "guess", **session.get_status()})
+                    await websocket.send_json({"action": "guess", **session.get_status(user)})
+                    for conn in connectionManager.get_connections(game_id):
+                        if conn != websocket:
+                            await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
                 except ValueError as e:
+                    if e.args[0] == GameErrorType.INVALID_WORD:
+                        await websocket.send_json({"action": "error", "error": str(e)})
+                        return
                     await websocket.send_json({"action": "error", "error": str(e)})
                     await websocket.close()
                     return
 
             elif action == "status":
-                await websocket.send_json({"action": "status", **session.get_status()})
+                await websocket.send_json({"action": "status", **session.get_status(user)})
 
             else:
                 await websocket.send_json({"action": "error", "message": f"Unknown action: {action}"})
@@ -98,6 +108,7 @@ def create_room(request: Request):
     except Exception as e:
         return JSONResponse(status_code=401, content={"error": str(e)})
     session = versusManager.create_session(user)
+    session = versusManager.start_session(user, session["game_id"])  # ONLY DEBUG
     return session
 
 

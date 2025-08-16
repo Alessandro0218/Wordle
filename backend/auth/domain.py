@@ -2,6 +2,7 @@ import json
 from enum import IntEnum
 
 from pydantic import BaseModel
+from starlette.authentication import BaseUser
 
 
 class User(BaseModel):
@@ -24,3 +25,22 @@ class GameErrorType(IntEnum):
     INVALID_WORD = 2
     PLAYER_ALREADY_EXISTS = 3
     NOT_SESSION_OWNER = 4
+    GAME_ALREADY_FINISHED = 5
+    INVALID_PLAYER = 6
+
+
+class AuthenticatedUser(BaseUser):
+    def __init__(self, user_model: User):
+        self.user_model = user_model
+
+    @property
+    def is_authenticated(self) -> bool:
+        return True
+
+    @property
+    def username(self) -> str:
+        return self.user_model.discord_username
+
+    @property
+    def id(self) -> int:
+        return self.user_model.id

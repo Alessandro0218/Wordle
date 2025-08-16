@@ -72,6 +72,11 @@ class Guess:
             "status": self.result,
         }
 
+    def to_dict_public(self):
+        return {
+            "status": self.result,
+        }
+
 
 class VersusGame:
     def __init__(self, owner: User, max_player: int = 4):
@@ -83,9 +88,9 @@ class VersusGame:
         self.word: str = get_random_word()
         self.max_players: int = max_player
 
-    def start(self):
+    def start(self, user: User):
         self.status = VersusGameStatus.IN_PROGRESS
-        return self.get_status()
+        return self.get_status(user)
 
     def add_player(self, player: User):
         if player.discord_id in [p.player_id for p in self.players]:
@@ -95,29 +100,29 @@ class VersusGame:
 
     def make_guess(self, player: User, guess: str):
         if self.status != VersusGameStatus.IN_PROGRESS:
-            raise ValueError("Game already finished")
+            raise ValueError(GameErrorType.GAME_ALREADY_FINISHED)
 
-        if player not in self.players:
-            raise ValueError("Invalid player")
+        if player.discord_id not in [p.player_id for p in self.players]:
+            raise ValueError(GameErrorType.INVALID_PLAYER)
 
-        game = next(list(filter(lambda user: user.player_id == player.discord_username, self.players)))
-        result = game.make_guess(guess)
+        player_game = next(filter(lambda user: user.player_id == player.discord_id, self.players))
+        result = player_game.game.make_guess(guess)
 
-        if game.status == GameStatus.WON:
+        if player_game.game.status == GameStatus.WON:
             self.status = VersusGameStatus.FINISHED
             self.winner = player
 
-        elif all(p.game.status != GameStatus.IN_PROGRESS for p in self.players.values()):
-            self.status = VersusGameStatus.FINISHED
+        """ elif all(p.game.status != GameStatus.IN_PROGRESS for p in self.players.values()):
+            self.status = VersusGameStatus.FINISHED """
 
         return result
 
-    def get_status(self):
+    def get_status(self, user: User):
         return {
             "game_id": self.game_id,
             "status": self.status.value,
-            "winner": self.winner,
-            "players": [player.toJson() for player in self.players],
+            "winner": self.winner.to_json() if self.winner else None,
+            "players": [player.game.get_status(public=player.player_id != user.discord_id) for player in self.players],
             "max_players": self.max_players,
             "owner": self.owner.to_json(),
         }
@@ -153,11 +158,11 @@ class GameEngine:
 
         return result
 
-    def get_status(self):
+    def get_status(self, public: bool = False):
         return {
             "game_id": self.game_id,
             "word": self.word,
-            "guesses": [guess.to_dict() for guess in self.guesses],
+            "guesses": [guess.to_dict_public() if public else guess.to_dict() for guess in self.guesses],
             "max_guess": self.max_guesses,
             "status": self.status.value,
             "current_guess": self.current_guess,

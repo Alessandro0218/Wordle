@@ -32,14 +32,14 @@ class VersusManager:
     def create_session(self, owner: User):
         session = VersusGame(owner)
         self.sessions[session.game_id] = session
-        return session.get_status()
+        return session.get_status(owner)
 
     def start_session(self, user: User, game_id: str):
         session = self.sessions.get(game_id)
         if not session:
             raise ValueError(GameErrorType.SESSION_NOT_FOUND)
         if session.owner == user:
-            return session.start()
+            return session.start(user)
         else:
             raise ValueError(GameErrorType.NOT_SESSION_OWNER)
 
