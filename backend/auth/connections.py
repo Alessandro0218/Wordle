@@ -25,14 +25,22 @@ class JWTAuthBackend(AuthenticationBackend):
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}  # key = game_id
+        self.active_connections: Dict[str, list[WebSocket]] = {}  # key = game_id
 
     async def connect(self, game_id: str, websocket: WebSocket):
         await websocket.accept()
-        self.active_connections[game_id] = websocket
+        if game_id not in self.active_connections:
+            self.active_connections[game_id] = []
+        self.active_connections[game_id].append(websocket)
 
-    def get_connections(self, game_id: str):
-        return [conn for gid, conn in self.active_connections.items() if gid == game_id]
+    def get_connections(self, game_id: str) -> list[WebSocket]:
+        return self.active_connections.get(game_id, [])
 
-    def disconnect(self, game_id: str):
-        self.active_connections.pop(game_id, None)
+    def disconnect(self, game_id: str, websocket: WebSocket):
+        if game_id in self.active_connections:
+            self.active_connections[game_id] = [
+                conn for conn in self.active_connections[game_id]
+                if conn != websocket
+            ]
+            if not self.active_connections[game_id]:
+                self.active_connections.pop(game_id)

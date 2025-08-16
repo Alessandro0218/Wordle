@@ -11,7 +11,6 @@ from backend.auth.jwt import create_jwt_token, verify_jwt_token
 def callbackLogic(code: str):
     CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", "")
     CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", "")
-    print(f"{CLIENT_ID=}, {CLIENT_SECRET=}")
     token_response = requests.post(
         "https://discord.com/api/oauth2/token",
         data={
@@ -40,8 +39,6 @@ def callbackLogic(code: str):
         return {"error": user_response.text, "status_code": user_response.status_code}
 
     user_data = user_response.json()
-
-    print(f"{user_data=}, {token_data=}")
 
     db = Database()
     user = db.create_user(

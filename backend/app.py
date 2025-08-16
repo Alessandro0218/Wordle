@@ -84,7 +84,7 @@ async def versus_socket(websocket: WebSocket):
                 except ValueError as e:
                     if e.args[0] == GameErrorType.INVALID_WORD:
                         await websocket.send_json({"action": "error", "error": str(e)})
-                        return
+                        continue
                     await websocket.send_json({"action": "error", "error": str(e)})
                     await websocket.close()
                     return
@@ -96,7 +96,9 @@ async def versus_socket(websocket: WebSocket):
                 await websocket.send_json({"action": "error", "message": f"Unknown action: {action}"})
 
     except WebSocketDisconnect:
-        connectionManager.disconnect(game_id)
+        connectionManager.disconnect(game_id, websocket)
+        if not connectionManager.get_connections(game_id):
+            versusManager.remove_session(game_id)
 
 
 @app.post("/versus/create")
@@ -174,7 +176,9 @@ async def wordle_socket(websocket: WebSocket):
                 await websocket.send_json({"action": "error", "message": f"Unknown action: {action}"})
 
     except WebSocketDisconnect:
-        connectionManager.disconnect(game_id)
+        connectionManager.disconnect(game_id, websocket)
+        if not connectionManager.get_connections(game_id):
+            versusManager.remove_session(game_id)
 
 
 @app.post("/start")
