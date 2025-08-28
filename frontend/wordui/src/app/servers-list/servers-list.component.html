@@ -19,7 +19,10 @@
         </div>
     </div>
     <div class="buttons">
-        <button class="btn">Create room</button>
+        <button class="btn" (click)="showDialog()">Create room</button>
         <button class="btn">Enter room</button>
     </div>
 </div>
+<p-dialog header="Create room" [modal]="true" [draggable]="false" [(visible)]="visible" [style]="{ width: '25rem' }">
+        
+</p-dialog>

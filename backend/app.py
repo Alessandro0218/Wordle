@@ -138,7 +138,7 @@ async def versus_socket(websocket: WebSocket):
 
 
 @app.post("/versus/create")
-def create_room(request: Request):
+async def create_room(request: Request):
     token = str(request.cookies.get("user_token", None))
     try:
         verify_jwt_token(token)
