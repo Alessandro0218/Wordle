@@ -1,6 +1,10 @@
+from pyee.asyncio import AsyncIOEventEmitter
+
 from backend.auth.domain import GameErrorType, User
 from backend.auth.service import get_user_data_from_token
 from backend.game.engine import GameEngine, VersusGame
+
+events = AsyncIOEventEmitter()
 
 
 class SingleManager:
@@ -32,6 +36,7 @@ class VersusManager:
     def create_session(self, owner: User):
         session = VersusGame(owner)
         self.sessions[session.game_id] = session
+        events.emit("session_updated", self.list_sessions())
         return session.get_status(owner)
 
     def start_session(self, user: User, game_id: str):
@@ -39,6 +44,7 @@ class VersusManager:
         if not session:
             raise ValueError(GameErrorType.SESSION_NOT_FOUND)
         if session.owner == user:
+            events.emit("session_updated", self.list_sessions())
             return session.start(user)
         else:
             raise ValueError(GameErrorType.NOT_SESSION_OWNER)
@@ -51,6 +57,7 @@ class VersusManager:
             user = get_user_data_from_token(user_token)
             if user:
                 session.add_player(user)
+                events.emit("session_updated", self.list_sessions())
         except Exception as e:
             raise e
 
@@ -61,4 +68,4 @@ class VersusManager:
         return self.sessions.pop(game_id, None)
 
     def list_sessions(self):
-        return list(self.sessions.keys())
+        return list(self.sessions)

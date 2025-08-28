@@ -1,0 +1,25 @@
+<div class="grid">
+    <div class="servers-list">
+        <div class="server" *ngFor="let server of servers">
+            <div class="header">
+                <div class="host">Host: &#64;{{ server.owner.discord_username }}</div>
+                <div class="max-players">{{ server.players.length }}/{{ server.max_players }}</div>
+            </div>
+            <div class="spacer"></div>
+            <div class="footer">
+                <div class="players">
+                    @for (player_state of server.players; track $index) {
+                        <img class="avatar" [src]="'https://cdn.discordapp.com/avatars/'+player_state.player.discord_id+'/'+player_state.player.discord_avatar+'.webp?size=32'" alt="avatar">
+                    }
+                </div>
+                <div class="state">
+                    <div class="status">LOBBY</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="buttons">
+        <button class="btn">Create room</button>
+        <button class="btn">Enter room</button>
+    </div>
+</div>

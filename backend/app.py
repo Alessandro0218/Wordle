@@ -8,7 +8,7 @@ from backend.auth.domain import GameErrorType, User
 from backend.auth.jwt import create_jwt_token, verify_jwt_token
 from backend.auth.routes import router
 from backend.auth.service import get_user_data_from_token
-from backend.game.session import SingleManager, VersusManager
+from backend.game.session import SingleManager, VersusManager, events
 
 """ dotenv_path = os.path.join(os.path.dirname(__file__), "env", ".env")
 load_dotenv(dotenv_path=dotenv_path) """
@@ -37,6 +37,42 @@ def read_root():
 
 
 # Multi Player
+
+
+@app.websocket("/versus/list")
+async def list_versus_games(websocket: WebSocket):
+    await connectionManager.connect("guest", websocket)
+    await websocket.send_json(
+        {
+            "action": "list",
+            "data": list(
+                map(
+                    lambda x: versusManager.get_session(x).get_status(websocket.user.user_model),
+                    versusManager.list_sessions(),
+                )
+            ),
+        }
+    )
+
+    @events.on("session_updated")
+    async def handle_update(sessions):
+        try:
+            await websocket.send_json(
+                {
+                    "action": "list",
+                    "data": list(
+                        map(lambda x: versusManager.get_session(x).get_status(websocket.user.user_model), sessions)
+                    ),
+                }
+            )
+        except Exception:
+            events.remove_listener("session_updated", handle_update)
+
+    try:
+        await websocket.receive_text()
+    except WebSocketDisconnect:
+        events.remove_listener("session_updated", handle_update)
+        connectionManager.disconnect("guest", websocket)
 
 
 @app.websocket("/versus/{game_id}")

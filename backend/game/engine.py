@@ -23,15 +23,15 @@ class VersusGameStatus(Enum):
 
 
 class PlayerState:
-    def __init__(self, player: str, defined_word: str | None = None):
-        self._player_id = player
+    def __init__(self, player: User, defined_word: str | None = None):
+        self._player = player
         self._ready: bool = False
         self._online: bool = False
         self._game: GameEngine = GameEngine(defined_word)
 
     @property
-    def player_id(self):
-        return self._player_id
+    def player(self):
+        return self._player
 
     @property
     def ready(self):
@@ -57,8 +57,13 @@ class PlayerState:
     def game(self, game):
         self._game = game
 
-    def toJson(self):
-        return {"player_id": self.player_id, "ready": self.ready, "online": self.online, "game": self.game.get_status()}
+    def to_json(self, public: bool = False):
+        return {
+            "player": self.player.model_dump(),
+            "ready": self.ready,
+            "online": self.online,
+            "game": self.game.get_status(public=public),
+        }
 
 
 class Guess:
@@ -93,19 +98,19 @@ class VersusGame:
         return self.get_status(user)
 
     def add_player(self, player: User):
-        if player.discord_id in [p.player_id for p in self.players]:
+        if player.discord_id in [p.player.discord_id for p in self.players]:
             raise ValueError(GameErrorType.PLAYER_ALREADY_EXISTS)
 
-        self.players.append(PlayerState(player.discord_id, self.word))
+        self.players.append(PlayerState(player, self.word))
 
     def make_guess(self, player: User, guess: str):
         if self.status != VersusGameStatus.IN_PROGRESS:
             raise ValueError(GameErrorType.GAME_ALREADY_FINISHED)
 
-        if player.discord_id not in [p.player_id for p in self.players]:
+        if player.discord_id not in [p.player.discord_id for p in self.players]:
             raise ValueError(GameErrorType.INVALID_PLAYER)
 
-        player_game = next(filter(lambda user: user.player_id == player.discord_id, self.players))
+        player_game = next(filter(lambda user: user.player.discord_id == player.discord_id, self.players))
         result = player_game.game.make_guess(guess)
 
         if player_game.game.status == GameStatus.WON:
@@ -122,7 +127,10 @@ class VersusGame:
             "game_id": self.game_id,
             "status": self.status.value,
             "winner": self.winner.to_json() if self.winner else None,
-            "players": [player.game.get_status(public=player.player_id != user.discord_id) for player in self.players],
+            "players": [
+                player_state.to_json(public=player_state.player.discord_id != user.discord_id)
+                for player_state in self.players
+            ],
             "max_players": self.max_players,
             "owner": self.owner.to_json(),
         }

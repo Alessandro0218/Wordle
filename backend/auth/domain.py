@@ -15,8 +15,8 @@ class User(BaseModel):
     def from_json(cls, json_str: str):
         return cls(**json.loads(json_str))
 
-    def to_json(self) -> str:
-        return self.model_dump_json()
+    def to_json(self):
+        return self.model_dump()
 
 
 class GameErrorType(IntEnum):

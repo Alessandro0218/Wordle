@@ -38,9 +38,6 @@ class ConnectionManager:
 
     def disconnect(self, game_id: str, websocket: WebSocket):
         if game_id in self.active_connections:
-            self.active_connections[game_id] = [
-                conn for conn in self.active_connections[game_id]
-                if conn != websocket
-            ]
+            self.active_connections[game_id] = [conn for conn in self.active_connections[game_id] if conn != websocket]
             if not self.active_connections[game_id]:
                 self.active_connections.pop(game_id)

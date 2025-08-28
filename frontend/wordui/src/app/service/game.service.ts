@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { catchError, map, Observable, of, Subject, timeout } from 'rxjs';
-import { GameAction, GameActionPayload, GameActionType, WebSocketService, GameErrorType } from './websocket.service';
+import { GameAction, GameActionPayload, GameActionType, WebSocketService, GameErrorType, VersusSocket } from './websocket.service';
 import { Game } from '../domain/game';
 
 export enum GameChangedEvent {
@@ -16,6 +16,9 @@ export enum GameChangedEvent {
   StatusError,
   GameNotFound,
   WordNotValid,
+
+  ListSuccess,
+  ListError,
 }
 
 export class GameChangedResult {
@@ -129,5 +132,65 @@ export class GameService {
   private fetchStatusRequestWS(): void {
     const statusAction = new GameAction(GameActionType.STATUS);
     this.wsService.send(statusAction);
+  }
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class VersusService {
+  private onDataChangedEvent: Subject<GameChangedResult> = new Subject<GameChangedResult>();
+
+  constructor(
+    private versusSocket: VersusSocket,
+  ) {
+    this.versusSocket.onConnection().subscribe(() => {
+      this.versusSocket.onMessage().subscribe((msg: GameAction) => this.handleWSMessage(msg));
+    });
+  }
+
+  onDataChanged(): Observable<GameChangedResult> {
+    return this.onDataChangedEvent.asObservable();
+  }
+
+  private handleWSMessage(msg: GameAction): void {
+    const result = new GameChangedResult();
+    switch (msg.action) {
+      case GameActionType.STATUS:
+        result.event = GameChangedEvent.StatusSuccess;
+        result.data = new Game().fromJson(msg);
+        this.onDataChangedEvent.next(result);
+        break;
+      case GameActionType.GUESS:
+        result.event = GameChangedEvent.GuessSuccess;
+        result.data = new Game().fromJson(msg);
+        this.onDataChangedEvent.next(result);
+        break;
+      case GameActionType.ERROR:
+        msg.error = parseInt(msg.error?.toString() || '0', 10);
+        switch (msg.error) {
+          case GameErrorType.SESSION_NOT_FOUND:
+            result.event = GameChangedEvent.GameNotFound;
+            break;
+          case GameErrorType.INVALID_WORD:
+            result.event = GameChangedEvent.WordNotValid;
+            break;
+          default:
+            result.event = GameChangedEvent.StartError;
+        }
+        this.onDataChangedEvent.next(result);
+        break;
+      case GameActionType.LIST:
+        result.event = GameChangedEvent.ListSuccess;
+        result.data = msg.data;
+        this.onDataChangedEvent.next(result);
+        break;
+      default:
+        console.warn('Unknown action type received:', msg.action);
+    }
+  }
+
+  connectList(): void {
+    this.versusSocket.connectList();
   }
 }
