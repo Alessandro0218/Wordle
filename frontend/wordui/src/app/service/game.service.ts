@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment.development';
 import { catchError, map, Observable, of, Subject, timeout } from 'rxjs';
 import { GameAction, GameActionPayload, GameActionType, WebSocketService, GameErrorType, VersusSocket } from './websocket.service';
-import { Game } from '../domain/game';
+import { Game, VersusGame } from '../domain/game';
 
 export enum GameChangedEvent {
   StartSuccess,
@@ -56,12 +56,12 @@ export class GameService {
     switch (msg.action) {
       case GameActionType.STATUS:
         result.event = GameChangedEvent.StatusSuccess;
-        result.data = new Game().fromJson(msg);
+        result.data = new Game().from_json(msg);
         this.onDataChangedEvent.next(result);
         break;
       case GameActionType.GUESS:
         result.event = GameChangedEvent.GuessSuccess;
-        result.data = new Game().fromJson(msg);
+        result.data = new Game().from_json(msg);
         this.onDataChangedEvent.next(result);
         break;
       case GameActionType.ERROR:
@@ -86,6 +86,8 @@ export class GameService {
   postStart(timeoutValue: number = this.DEFAULT_TIMEOUT): void {
     this.postStartRequest(timeoutValue).subscribe({
       next: (result: GameChangedResult) => {
+        console.log(result);
+        
         this.onDataChangedEvent.next(result);
       },
       error: (error: any) => {
@@ -143,6 +145,7 @@ export class VersusService {
 
   constructor(
     private versusSocket: VersusSocket,
+    private http: HttpClient,
   ) {
     this.versusSocket.onConnection().subscribe(() => {
       this.versusSocket.onMessage().subscribe((msg: GameAction) => this.handleWSMessage(msg));
@@ -158,12 +161,12 @@ export class VersusService {
     switch (msg.action) {
       case GameActionType.STATUS:
         result.event = GameChangedEvent.StatusSuccess;
-        result.data = new Game().fromJson(msg);
+        result.data = new VersusGame().from_json(msg);
         this.onDataChangedEvent.next(result);
         break;
       case GameActionType.GUESS:
         result.event = GameChangedEvent.GuessSuccess;
-        result.data = new Game().fromJson(msg);
+        result.data = new Game().from_json(msg);
         this.onDataChangedEvent.next(result);
         break;
       case GameActionType.ERROR:
@@ -192,5 +195,40 @@ export class VersusService {
 
   connectList(): void {
     this.versusSocket.connectList();
+  }
+
+  createRoom(name: string, max_players: number): void {
+    this.postCreateRequest(name, max_players).subscribe({
+      next: (result) => {
+        this.onDataChangedEvent.next(result);
+      },
+      error: (error) => {
+        this.onDataChangedEvent.next(error);
+      }
+    });
+  }
+
+  connectToServer(game_id: string): void {
+    this.versusSocket.connect(game_id);
+  }
+
+  private postCreateRequest(name: string, max_players: number, timeoutValue: number = 5000): Observable<GameChangedResult> {
+    const url = `${environment.HOST}:${environment.PORT}/versus/create`;
+
+    return this.http.post(url, { name, max_players }, { withCredentials: true }).pipe(
+      timeout(timeoutValue),
+      map((response: any) => {
+        const result = new GameChangedResult();
+        result.event = GameChangedEvent.StartSuccess;
+        result.data = response;
+        return result;
+      }),
+      catchError((error: any) => {
+        const result = new GameChangedResult();
+        result.event = GameChangedEvent.StartError;
+        result.data = error;
+        return of(result);
+      })
+    );
   }
 }

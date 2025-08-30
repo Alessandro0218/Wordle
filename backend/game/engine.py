@@ -1,6 +1,8 @@
 import uuid
 from enum import Enum
 
+from pydantic import BaseModel
+
 from backend.auth.domain import GameErrorType, User
 from backend.game.wordlist import (
     WordStatus,
@@ -83,9 +85,15 @@ class Guess:
         }
 
 
+class CreateRoomRequest(BaseModel):
+    name: str
+    max_players: int
+
+
 class VersusGame:
-    def __init__(self, owner: User, max_player: int = 4):
+    def __init__(self, owner: User, name: str, max_player: int = 4):
         self.game_id: str = str(uuid.uuid4())
+        self.name: str = name
         self.status: VersusGameStatus = VersusGameStatus.CREATED
         self.players: list[PlayerState] = []
         self.winner: User | None = None
@@ -125,6 +133,7 @@ class VersusGame:
     def get_status(self, user: User):
         return {
             "game_id": self.game_id,
+            "name": self.name,
             "status": self.status.value,
             "winner": self.winner.to_json() if self.winner else None,
             "players": [

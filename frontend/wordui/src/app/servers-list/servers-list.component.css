@@ -57,6 +57,7 @@
     flex-direction: column;
     justify-content: space-between;
     width: 100%;
+    cursor: pointer;
 }
 
 .server .header {
@@ -95,6 +96,12 @@
     color: white;
     font-family: 'Arial', sans-serif;
     font-size: 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 @media screen and (max-width: 768px) {

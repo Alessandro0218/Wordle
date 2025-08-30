@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthService } from 'service/auth.service';
 
 enum Mode {
-  VERSUS = 'versus',
+  VERSUS = 'servers-list',
   WORDLE = 'wordle'
 }
 

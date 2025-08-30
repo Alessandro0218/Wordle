@@ -1,12 +1,10 @@
-import { from } from "rxjs";
-
 export class User {
     id: number | undefined;
     discord_id: string | undefined;
     discord_username: string | undefined;
     discord_avatar: string | undefined;
 
-    fromJson(json: any): User {
+    from_json(json: any): User {
         this.id = json.id;
         this.discord_id = json.discord_id;
         this.discord_username = json.discord_username;
@@ -14,7 +12,7 @@ export class User {
         return this;
     }
 
-    toJson(): any {
+    to_json(): any {
         return {
             id: this.id,
             discord_id: this.discord_id,

@@ -8,6 +8,7 @@ from backend.auth.domain import GameErrorType, User
 from backend.auth.jwt import create_jwt_token, verify_jwt_token
 from backend.auth.routes import router
 from backend.auth.service import get_user_data_from_token
+from backend.game.engine import CreateRoomRequest
 from backend.game.session import SingleManager, VersusManager, events
 
 """ dotenv_path = os.path.join(os.path.dirname(__file__), "env", ".env")
@@ -41,30 +42,21 @@ def read_root():
 
 @app.websocket("/versus/list")
 async def list_versus_games(websocket: WebSocket):
+    def get_sessions():
+        sessions = []
+        for x in versusManager.list_sessions():
+            session = versusManager.get_session(x)
+            if session is not None:
+                sessions.append(session.get_status(websocket.user.user_model))
+        return sessions
+
     await connectionManager.connect("guest", websocket)
-    await websocket.send_json(
-        {
-            "action": "list",
-            "data": list(
-                map(
-                    lambda x: versusManager.get_session(x).get_status(websocket.user.user_model),
-                    versusManager.list_sessions(),
-                )
-            ),
-        }
-    )
+    await websocket.send_json({"action": "list", "data": get_sessions()})
 
     @events.on("session_updated")
-    async def handle_update(sessions):
+    async def handle_update(_):
         try:
-            await websocket.send_json(
-                {
-                    "action": "list",
-                    "data": list(
-                        map(lambda x: versusManager.get_session(x).get_status(websocket.user.user_model), sessions)
-                    ),
-                }
-            )
+            await websocket.send_json({"action": "list", "data": get_sessions()})
         except Exception:
             events.remove_listener("session_updated", handle_update)
 
@@ -138,15 +130,15 @@ async def versus_socket(websocket: WebSocket):
 
 
 @app.post("/versus/create")
-async def create_room(request: Request):
+async def create_room(request: Request, room: CreateRoomRequest):
     token = str(request.cookies.get("user_token", None))
     try:
         verify_jwt_token(token)
         user = get_user_data_from_token(token)
     except Exception as e:
         return JSONResponse(status_code=401, content={"error": str(e)})
-    session = versusManager.create_session(user)
-    session = versusManager.start_session(user, session["game_id"])  # ONLY DEBUG
+    session = versusManager.create_session(user, room.name, room.max_players)
+    # session = versusManager.start_session(user, session["game_id"])  # ONLY DEBUG
     return session
 
 
@@ -164,6 +156,19 @@ def start_game(request: Request, game_id: str):
         return JSONResponse(status_code=400, content={"error": str(e)})
     return session
 
+@app.post("/versus/join")
+async def join_game(request: Request, game_id: str):
+    token = str(request.cookies.get("user_token", None))
+    try:
+        verify_jwt_token(token)
+        user = get_user_data_from_token(token)
+    except Exception as e:
+        return JSONResponse(status_code=401, content={"error": str(e)})
+    try:
+        session = versusManager.join_session(user, game_id)
+    except Exception as e:
+        return JSONResponse(status_code=400, content={"error": str(e)})
+    return session
 
 # Single Player
 

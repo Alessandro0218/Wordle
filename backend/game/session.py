@@ -33,8 +33,8 @@ class VersusManager:
     def __init__(self):
         self.sessions: dict[str, VersusGame] = {}
 
-    def create_session(self, owner: User):
-        session = VersusGame(owner)
+    def create_session(self, owner: User, name: str, max_players: int):
+        session = VersusGame(owner, name, max_players)
         self.sessions[session.game_id] = session
         events.emit("session_updated", self.list_sessions())
         return session.get_status(owner)
