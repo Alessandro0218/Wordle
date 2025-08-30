@@ -90,6 +90,10 @@ class CreateRoomRequest(BaseModel):
     max_players: int
 
 
+class EnterRoomRequest(BaseModel):
+    code: str
+
+
 class VersusGame:
     def __init__(self, owner: User, name: str, max_player: int = 4):
         self.game_id: str = str(uuid.uuid4())

@@ -8,7 +8,7 @@ from backend.auth.domain import GameErrorType, User
 from backend.auth.jwt import create_jwt_token, verify_jwt_token
 from backend.auth.routes import router
 from backend.auth.service import get_user_data_from_token
-from backend.game.engine import CreateRoomRequest
+from backend.game.engine import CreateRoomRequest, EnterRoomRequest
 from backend.game.session import SingleManager, VersusManager, events
 
 """ dotenv_path = os.path.join(os.path.dirname(__file__), "env", ".env")
@@ -156,19 +156,35 @@ def start_game(request: Request, game_id: str):
         return JSONResponse(status_code=400, content={"error": str(e)})
     return session
 
+
 @app.post("/versus/join")
-async def join_game(request: Request, game_id: str):
+async def join_game(request: Request, arg: EnterRoomRequest):
     token = str(request.cookies.get("user_token", None))
+    code = arg.code
     try:
         verify_jwt_token(token)
-        user = get_user_data_from_token(token)
     except Exception as e:
         return JSONResponse(status_code=401, content={"error": str(e)})
+
+    if len(code) != 5:
+        return JSONResponse(status_code=400, content={"error": "Invalid game ID format"})
+
     try:
-        session = versusManager.join_session(user, game_id)
+        sessions = versusManager.list_sessions()
+        if len(sessions) == 0:
+            raise ValueError(GameErrorType.SESSION_NOT_FOUND)
+
+        game_id = next(session for session in sessions if code in session)
+        if not game_id:
+            raise ValueError(GameErrorType.SESSION_NOT_FOUND)
+
+        session = versusManager.get_session(game_id)
+        if not session:
+            raise ValueError(GameErrorType.SESSION_NOT_FOUND)
+        return session
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})
-    return session
+
 
 # Single Player
 

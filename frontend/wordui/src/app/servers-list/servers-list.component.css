@@ -4,6 +4,12 @@
     padding: 60px;
 }
 
+input,
+.p-inputtext:enabled:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 .grid {
     display: inline-flex;
     width: 100%;
@@ -46,6 +52,11 @@
     font-size: 18px;
     color: #333;
     letter-spacing: -0.5px;
+}
+
+.buttons .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .servers-list .server {
@@ -104,6 +115,10 @@
     gap: 12px;
 }
 
+.submit-btn {
+    width: min-content;
+}
+
 @media screen and (max-width: 768px) {
     .grid {
         flex-direction: column-reverse;
@@ -134,3 +149,4 @@
 .servers-list::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+

@@ -8,6 +8,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { Subscription } from 'rxjs';
+import { RippleModule } from 'primeng/ripple';
 
 @Component({
   selector: 'app-servers-list',
@@ -20,6 +21,7 @@ import { Subscription } from 'rxjs';
     InputTextModule,
     ReactiveFormsModule,
     TooltipModule,
+    RippleModule,
   ],
   templateUrl: './servers-list.component.html',
   styleUrl: './servers-list.component.css'
@@ -27,11 +29,16 @@ import { Subscription } from 'rxjs';
 export class ServersListComponent implements OnInit, OnDestroy {
 
   servers: any = [];
-  visible: boolean = false;
+  createDialogVisibility: boolean = false;
+  enterDialogVisibility: boolean = false;
 
-  formGroup: FormGroup = new FormGroup({
+  createRoom: FormGroup = new FormGroup({
     name: new FormControl("GIGI server", [Validators.required]),
     maxPlayers: new FormControl(2, [Validators.required]),
+  });
+
+  enterRoom: FormGroup = new FormGroup({
+    code: new FormControl("", [Validators.required, Validators.minLength(5), Validators.maxLength(5)]),
   });
 
   subscriptions: Subscription[] = [];
@@ -51,6 +58,9 @@ export class ServersListComponent implements OnInit, OnDestroy {
           case GameChangedEvent.StartSuccess:
             console.log(args.data);
             break;
+          case GameChangedEvent.EnterSuccess:
+            this.connectToServer(args.data.game_id);
+            break;
           default:
             break;
         }
@@ -62,15 +72,27 @@ export class ServersListComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
-  showDialog() {
-    this.visible = true;
+  showCreateDialog() {
+    this.createDialogVisibility = true;
+  }
+
+  showEnterDialog() {
+    this.enterDialogVisibility = true;
   }
 
   onSubmitCreate() {
-    if (this.formGroup.valid) {
-      const { name, maxPlayers } = this.formGroup.value;
+    if (this.createRoom.valid) {
+      const { name, maxPlayers } = this.createRoom.value;
       this.versusService.createRoom(name, maxPlayers);
-      this.visible = false;
+      this.createDialogVisibility = false;
+    }
+  }
+
+  onSubmitEnter() {
+    if (this.enterRoom.valid) {
+      const { code } = this.enterRoom.value;
+      this.versusService.enterRoom(code);
+      this.enterDialogVisibility = false;
     }
   }
 

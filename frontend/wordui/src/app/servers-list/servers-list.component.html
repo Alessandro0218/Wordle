@@ -19,16 +19,23 @@
         </div>
     </div>
     <div class="buttons">
-        <button class="btn" (click)="showDialog()">Create room</button>
-        <button class="btn">Enter room</button>
+        <button class="btn" (click)="showCreateDialog()">Create room</button>
+        <button class="btn" (click)="showEnterDialog()" [disabled]="!servers.length">Enter room</button>
     </div>
 </div>
-<p-dialog header="Create room" [modal]="true" [draggable]="false" [(visible)]="visible" [style]="{ width: '25rem' }">
-    <form class="form" [formGroup]="formGroup">
+<p-dialog header="Create room" [modal]="true" [draggable]="false" [(visible)]="createDialogVisibility" [style]="{ width: '25rem' }">
+    <form class="form" [formGroup]="createRoom">
         <label for="username">Name:</label>
         <input type="text" pInputText formControlName="name" />
         <label for="maxPlayers">Max Players:</label>
         <p-inputNumber id="maxPlayers" inputId="integeronly" min="2" max="6" formControlName="maxPlayers" />
-        <p-button label="Submit" (click)="onSubmitCreate()" />
+        <p-button class="submit-btn" pRipple label="Submit" (click)="onSubmitCreate()" />
+    </form>
+</p-dialog>
+<p-dialog header="Enter room" [modal]="true" [draggable]="false" [(visible)]="enterDialogVisibility" [style]="{ width: '25rem' }">
+    <form class="form" [formGroup]="enterRoom">
+        <label for="username">CODE:</label>
+        <input type="text" pInputText formControlName="code" />
+        <p-button class="submit-btn" pRipple label="Submit" (click)="onSubmitEnter()" />
     </form>
 </p-dialog>

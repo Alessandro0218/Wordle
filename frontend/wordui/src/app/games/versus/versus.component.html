@@ -1,1 +1,12 @@
 <app-wordle></app-wordle>
+<p-dialog [modal]="true" [closable]="false" [draggable]="false" [(visible)]="visible" [styleClass]="'my-dialog'" [style]="{ width: '100%', height: '100%', maxHeight: '100%', borderRadius: '0' }">
+    <div class="lobby">
+        <span class="lobby-title">Lobby</span>
+        <div class="lobby-players">
+            <div class="player" *ngFor="let player of players">
+                <img class="avatar" [src]="'https://cdn.discordapp.com/avatars/'+player.discord_id+'/'+player.discord_avatar+'.webp?size=64'" alt="avatar">
+                <span class="username">{{ player.discord_username }}</span>
+            </div>
+        </div>
+    </div>
+</p-dialog>

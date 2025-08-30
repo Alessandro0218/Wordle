@@ -19,6 +19,9 @@ export enum GameChangedEvent {
 
   ListSuccess,
   ListError,
+
+  EnterSuccess,
+  EnterError
 }
 
 export class GameChangedResult {
@@ -208,6 +211,17 @@ export class VersusService {
     });
   }
 
+  enterRoom(code: string): void {
+    this.postEnterRequest(code).subscribe({
+      next: (result) => {
+        this.onDataChangedEvent.next(result);
+      },
+      error: (error) => {
+        this.onDataChangedEvent.next(error);
+      }
+    });
+  }
+
   connectToServer(game_id: string): void {
     this.versusSocket.connect(game_id);
   }
@@ -226,6 +240,26 @@ export class VersusService {
       catchError((error: any) => {
         const result = new GameChangedResult();
         result.event = GameChangedEvent.StartError;
+        result.data = error;
+        return of(result);
+      })
+    );
+  }
+
+  postEnterRequest(code: string, timeoutValue: number = 5000): Observable<GameChangedResult> {
+    const url = `${environment.HOST}:${environment.PORT}/versus/join`;
+
+    return this.http.post(url, { code }, { withCredentials: true }).pipe(
+      timeout(timeoutValue),
+      map((response: any) => {
+        const result = new GameChangedResult();
+        result.event = GameChangedEvent.EnterSuccess;
+        result.data = response;
+        return result;
+      }),
+      catchError((error: any) => {
+        const result = new GameChangedResult();
+        result.event = GameChangedEvent.EnterError;
         result.data = error;
         return of(result);
       })

@@ -29,10 +29,10 @@ export class MenuComponent implements OnInit {
 
   onSelectionMode(mode: string): void {
     switch (mode) {
-      case 'versus':
+      case Mode.VERSUS:
         this.router.navigate([mode]);
         break;
-      case 'wordle':
+      case Mode.WORDLE:
         this.router.navigate([mode]);
         break;
     }
