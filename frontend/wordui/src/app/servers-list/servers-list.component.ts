@@ -9,6 +9,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { Subscription } from 'rxjs';
 import { RippleModule } from 'primeng/ripple';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-servers-list',
@@ -44,7 +45,8 @@ export class ServersListComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
 
   constructor(
-    private versusService: VersusService
+    private versusService: VersusService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -56,10 +58,10 @@ export class ServersListComponent implements OnInit, OnDestroy {
             this.servers = args.data;
             break;
           case GameChangedEvent.StartSuccess:
-            console.log(args.data);
+            /* console.log(args.data); */
             break;
           case GameChangedEvent.EnterSuccess:
-            this.connectToServer(args.data.game_id);
+            this.router.navigate(['/versus', args.data.game_id]);
             break;
           default:
             break;
@@ -70,6 +72,7 @@ export class ServersListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.versusService.disconnect();
   }
 
   showCreateDialog() {
@@ -97,7 +100,7 @@ export class ServersListComponent implements OnInit, OnDestroy {
   }
 
   connectToServer(game_id: string) {
-    this.versusService.connectToServer(game_id);
+    let code = game_id.substring(0, 5);
+    this.versusService.enterRoom(code);
   }
-
 }

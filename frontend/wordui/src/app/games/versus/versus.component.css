@@ -15,7 +15,7 @@
 .lobby-title {
     font-size: 5rem;
     font-weight: bold;
-    margin-bottom: 1rem;
+    margin-bottom: 5rem;
 }
 
 ::ng-deep .p-dialog .p-dialog-header,
@@ -29,23 +29,28 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
     width: 100%;
     max-height: 100%;
     overflow-y: auto;
+    gap: 100px;
 }
 
 .player {
+    --avatar-size: 128px;
     display: flex;
+    gap: 20px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 160px;
-    height: 160px;
     padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    border: 1px solid white;
     border-radius: 50%;
+}
 
+.player .avatar {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border: 5px solid white;
 }
 
 .player:last-child {

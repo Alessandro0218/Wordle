@@ -89,10 +89,15 @@ async def versus_socket(websocket: WebSocket):
 
     try:
         versusManager.join_session(token, game_id)
+    except ValueError as e:
+        if e.args[0] == GameErrorType.PLAYER_ALREADY_EXISTS:
+            pass
     except Exception as e:
         await websocket.send_json({"action": "error", "error": str(e)})
         await websocket.close()
         return
+
+    versusManager.set_player_online(user, game_id)
 
     await websocket.send_json({"action": "status", **session.get_status(user)})
 
@@ -126,7 +131,8 @@ async def versus_socket(websocket: WebSocket):
     except WebSocketDisconnect:
         connectionManager.disconnect(game_id, websocket)
         if not connectionManager.get_connections(game_id):
-            versusManager.remove_session(game_id)
+            # If no connections left, set the player offline
+            versusManager.set_player_offline(user, game_id)
 
 
 @app.post("/versus/create")
@@ -163,6 +169,7 @@ async def join_game(request: Request, arg: EnterRoomRequest):
     code = arg.code
     try:
         verify_jwt_token(token)
+        user = get_user_data_from_token(token)
     except Exception as e:
         return JSONResponse(status_code=401, content={"error": str(e)})
 
@@ -181,7 +188,7 @@ async def join_game(request: Request, arg: EnterRoomRequest):
         session = versusManager.get_session(game_id)
         if not session:
             raise ValueError(GameErrorType.SESSION_NOT_FOUND)
-        return session
+        return session.get_status(user)
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": str(e)})
 

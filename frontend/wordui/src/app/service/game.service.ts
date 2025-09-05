@@ -146,6 +146,8 @@ export class GameService {
 export class VersusService {
   private onDataChangedEvent: Subject<GameChangedResult> = new Subject<GameChangedResult>();
 
+  public joinRoomEvent: Subject<VersusGame> = new Subject<VersusGame>();
+
   constructor(
     private versusSocket: VersusSocket,
     private http: HttpClient,
@@ -157,6 +159,10 @@ export class VersusService {
 
   onDataChanged(): Observable<GameChangedResult> {
     return this.onDataChangedEvent.asObservable();
+  }
+
+  onJoinRoom(): Observable<VersusGame> {
+    return this.joinRoomEvent.asObservable();
   }
 
   private handleWSMessage(msg: GameAction): void {
@@ -214,6 +220,7 @@ export class VersusService {
   enterRoom(code: string): void {
     this.postEnterRequest(code).subscribe({
       next: (result) => {
+        this.joinRoomEvent.next(result.data);
         this.onDataChangedEvent.next(result);
       },
       error: (error) => {
@@ -224,6 +231,10 @@ export class VersusService {
 
   connectToServer(game_id: string): void {
     this.versusSocket.connect(game_id);
+  }
+
+  disconnect(): void {
+    this.versusSocket.close();
   }
 
   private postCreateRequest(name: string, max_players: number, timeoutValue: number = 5000): Observable<GameChangedResult> {
@@ -254,7 +265,7 @@ export class VersusService {
       map((response: any) => {
         const result = new GameChangedResult();
         result.event = GameChangedEvent.EnterSuccess;
-        result.data = response;
+        result.data = new VersusGame().from_json(response);
         return result;
       }),
       catchError((error: any) => {

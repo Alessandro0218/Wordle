@@ -101,6 +101,11 @@ input,
     background-color: #f0f0f0;
 }
 
+.avatar.offline {
+    filter: grayscale(100%) brightness(90%);
+    opacity: 0.6;
+}
+
 .server .host,
 .server .max-players,
 .server .status {

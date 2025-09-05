@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { User } from 'domain/user';
-import { WordleComponent } from 'games/wordle/wordle.component';
+import { ActivatedRoute } from '@angular/router';
+import { VersusGame } from 'domain/game';
 import { DialogModule } from 'primeng/dialog';
+import { GameChangedEvent, VersusService } from 'service/game.service';
 
 @Component({
   selector: 'app-versus',
   standalone: true,
   imports: [
     CommonModule,
-    WordleComponent,
     DialogModule,
   ],
   templateUrl: './versus.component.html',
@@ -18,19 +18,55 @@ import { DialogModule } from 'primeng/dialog';
 export class VersusComponent implements OnInit, OnDestroy {
 
   visible: boolean = false;
-  players: User[] = [
-    new User().from_json({ id: 1, discord_id: '217966624886620160', discord_username: 'gigikiller', discord_avatar: '78168c031e6c8500f5e19a0459086bb7' }),
-    new User().from_json({ id: 2, discord_id: '348424836680384512', discord_username: '.servitore', discord_avatar: '030b101412fbdc6e4ceacd105c0e1577' }),
-  ];
+  game: VersusGame = new VersusGame();
 
-  constructor() {}
+  subscriptions: any[] = [];
+
+  constructor(
+    private versusService: VersusService,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit() {
     this.visible = true;
+
+    this.subscriptions.push(this.versusService.onJoinRoom().subscribe((game: VersusGame) => {
+      this.game = game;
+      this.versusService.connectToServer(game.game_id);
+    }));
+
+    this.subscriptions.push(this.versusService.onDataChanged().subscribe({
+      next: (args) => {
+        switch (args.event) {
+          case GameChangedEvent.EnterSuccess:
+            // this.game = args.data;
+            break;
+          case GameChangedEvent.StatusSuccess:
+            // this.game = args.data;
+            break;
+          default:
+            break;
+        }
+      }
+    }));
+
+    this.connectoToGame();
+
   }
 
   ngOnDestroy() {
-    
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
+    this.versusService.disconnect();
+  }
+
+  getGameIdFromRoute(): string {
+    const url = this.route.snapshot.params['game_id'];
+    return url ? url : '';
+  }
+
+  connectoToGame(): void {
+    const code = this.getGameIdFromRoute().substring(0, 5);
+    this.versusService.enterRoom(code);
   }
 
 }

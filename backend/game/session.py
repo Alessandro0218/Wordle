@@ -69,3 +69,17 @@ class VersusManager:
 
     def list_sessions(self):
         return list(self.sessions)
+    
+    def set_player_offline(self, user: User, game_id):
+        session = self.sessions.get(game_id)
+        if not session:
+            return
+        session.set_player_offline(user)
+        events.emit("session_updated", self.list_sessions())
+
+    def set_player_online(self, user: User, game_id):
+        session = self.sessions.get(game_id)
+        if not session:
+            return
+        session.set_player_online(user)
+        events.emit("session_updated", self.list_sessions())

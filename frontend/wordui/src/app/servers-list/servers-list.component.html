@@ -9,7 +9,11 @@
             <div class="footer">
                 <div class="players">
                     @for (player_state of server.players; track $index) {
-                        <img class="avatar" [pTooltip]="player_state.player.discord_username" tooltipPosition="top" [src]="'https://cdn.discordapp.com/avatars/'+player_state.player.discord_id+'/'+player_state.player.discord_avatar+'.webp?size=32'" alt="avatar">
+                        @if (player_state.online) {
+                            <img class="avatar" [pTooltip]="player_state.player.discord_username" tooltipPosition="top" [src]="'https://cdn.discordapp.com/avatars/'+player_state.player.discord_id+'/'+player_state.player.discord_avatar+'.webp?size=32'" alt="avatar">
+                        } @else {
+                            <img class="avatar offline" [pTooltip]="player_state.player.discord_username + ' (offline)'" tooltipPosition="top" [src]="'https://cdn.discordapp.com/avatars/'+player_state.player.discord_id+'/'+player_state.player.discord_avatar+'.webp?size=32'" alt="avatar">
+                        }
                     }
                 </div>
                 <div class="state">
