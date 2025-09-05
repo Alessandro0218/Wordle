@@ -237,6 +237,11 @@ export class VersusService {
     this.versusSocket.close();
   }
 
+  toggleReady(): void {
+    const action = new GameAction(GameActionType.READY);
+    this.versusSocket.send(action);
+  }
+
   private postCreateRequest(name: string, max_players: number, timeoutValue: number = 5000): Observable<GameChangedResult> {
     const url = `${environment.HOST}:${environment.PORT}/versus/create`;
 

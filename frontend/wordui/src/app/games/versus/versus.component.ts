@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { VersusGame } from 'domain/game';
+import { PlayerState, VersusGame } from 'domain/game';
 import { DialogModule } from 'primeng/dialog';
+import { AuthService } from 'service/auth.service';
 import { GameChangedEvent, VersusService } from 'service/game.service';
 
 @Component({
@@ -20,10 +21,13 @@ export class VersusComponent implements OnInit, OnDestroy {
   visible: boolean = false;
   game: VersusGame = new VersusGame();
 
+  myId = this.authService.DiscordId;
+
   subscriptions: any[] = [];
 
   constructor(
     private versusService: VersusService,
+    private authService: AuthService,
     private route: ActivatedRoute,
   ) {}
 
@@ -42,7 +46,7 @@ export class VersusComponent implements OnInit, OnDestroy {
             // this.game = args.data;
             break;
           case GameChangedEvent.StatusSuccess:
-            // this.game = args.data;
+            this.game = args.data;
             break;
           default:
             break;
@@ -67,6 +71,14 @@ export class VersusComponent implements OnInit, OnDestroy {
   connectoToGame(): void {
     const code = this.getGameIdFromRoute().substring(0, 5);
     this.versusService.enterRoom(code);
+  }
+
+  toggleReady(): void {
+    this.versusService.toggleReady();
+  }
+
+  onlinePlayers(): PlayerState[] {
+    return this.game.players.filter(p => p.online);
   }
 
 }

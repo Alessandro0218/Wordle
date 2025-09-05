@@ -125,6 +125,16 @@ async def versus_socket(websocket: WebSocket):
             elif action == "status":
                 await websocket.send_json({"action": "status", **session.get_status(user)})
 
+            elif action == "ready":
+                versusManager.set_player_ready(user, game_id)
+                for conn in connectionManager.get_connections(game_id):
+                    await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
+
+            elif action == "unready":
+                versusManager.set_player_unready(user, game_id)
+                for conn in connectionManager.get_connections(game_id):
+                    await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
+
             else:
                 await websocket.send_json({"action": "error", "message": f"Unknown action: {action}"})
 
