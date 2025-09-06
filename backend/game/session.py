@@ -1,8 +1,11 @@
+import asyncio
+import time
+
 from pyee.asyncio import AsyncIOEventEmitter
 
 from backend.auth.domain import GameErrorType, User
 from backend.auth.service import get_user_data_from_token
-from backend.game.engine import GameEngine, VersusGame
+from backend.game.engine import GameEngine, VersusGame, VersusGameStatus
 
 events = AsyncIOEventEmitter()
 
@@ -32,6 +35,26 @@ class SingleManager:
 class VersusManager:
     def __init__(self):
         self.sessions: dict[str, VersusGame] = {}
+
+        asyncio.create_task(self._monitor_inactivity())
+
+    async def _monitor_inactivity(self):
+        while True:
+            if not self.sessions:
+                await asyncio.sleep(5)
+                continue
+            await asyncio.sleep(1)
+            for session in self.sessions.values():
+                if session.status == VersusGameStatus.FINISHED:
+                    self.remove_session(session.game_id)
+                    continue
+                if all(not p.online for p in session.players):
+                    if time.time() - session._last_active > session.MAX_INACTIVITY_TIME:
+                        session.destroy()
+                else:
+                    session._touch()
+
+            events.emit("session_updated", self.list_sessions())
 
     def create_session(self, owner: User, name: str, max_players: int):
         session = VersusGame(owner, name, max_players)
@@ -65,7 +88,10 @@ class VersusManager:
         return self.sessions.get(game_id)
 
     def remove_session(self, game_id: str) -> VersusGame | None:
-        return self.sessions.pop(game_id, None)
+        session = self.sessions.pop(game_id, None)
+        if session:
+            events.emit("session_updated", self.list_sessions())
+        return session
 
     def list_sessions(self):
         return list(self.sessions)

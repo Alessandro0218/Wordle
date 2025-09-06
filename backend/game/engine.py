@@ -1,3 +1,4 @@
+import time
 import uuid
 from enum import Enum
 
@@ -104,6 +105,14 @@ class VersusGame:
         self.owner: User = owner
         self.word: str = get_random_word()
         self.max_players: int = max_player
+        self.MAX_INACTIVITY_TIME = 600
+        self._last_active = time.time()
+
+    def _touch(self):
+        self._last_active = time.time()
+
+    def destroy(self):
+        self.status = VersusGameStatus.FINISHED
 
     def start(self, user: User):
         self.status = VersusGameStatus.IN_PROGRESS
@@ -146,6 +155,7 @@ class VersusGame:
             ],
             "max_players": self.max_players,
             "owner": self.owner.to_json(),
+            "time_remaining": int(self.MAX_INACTIVITY_TIME - (time.time() - self._last_active)),
         }
 
     def set_player_offline(self, user: User):
