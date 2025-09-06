@@ -82,6 +82,7 @@ class Guess:
 
     def to_dict_public(self):
         return {
+            "word": ''.join(['     ' for _ in self.guess]),
             "status": self.result,
         }
 

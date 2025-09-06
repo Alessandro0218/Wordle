@@ -175,7 +175,7 @@ export class VersusService {
         break;
       case GameActionType.GUESS:
         result.event = GameChangedEvent.GuessSuccess;
-        result.data = new Game().from_json(msg);
+        result.data = new VersusGame().from_json(msg);
         this.onDataChangedEvent.next(result);
         break;
       case GameActionType.ERROR:
@@ -244,6 +244,11 @@ export class VersusService {
 
   startGame(): void {
     const action = new GameAction(GameActionType.START);
+    this.versusSocket.send(action);
+  }
+
+  postGuess(game_id: string, guess: string): void {
+    const action = new GameAction(GameActionType.GUESS, new GameActionPayload(guess));
     this.versusSocket.send(action);
   }
 

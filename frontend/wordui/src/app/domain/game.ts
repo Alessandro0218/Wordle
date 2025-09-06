@@ -95,7 +95,7 @@ export class Game {
         this.status = json.status as GameState;
         this.max_guess = json.max_guess;
         this.current_guess = json.current_guess;
-        this.guesses = json.guesses.map((guess: Guess) => new Guess(guess.word.toUpperCase(), guess.status)).concat(
+        this.guesses = json.guesses.map((guess: any) => new Guess(guess.word.toUpperCase(), guess.status)).concat(
             Array.from({ length: this.max_guess - json.guesses.length }, () => new Guess(' '.repeat(this.word_length), Array(this.max_guess).fill(0)))
         );
         return this;
