@@ -107,7 +107,7 @@ export class VersusComponent implements OnInit, OnDestroy {
     if (this.myId !== this.game.owner?.discord_id) {
       return false;
     }
-    return this.game.players.length === this.game.max_players || this.game.players.filter(p => p.Player.discord_id !== this.game.owner?.discord_id).every(p => p.Ready);
+    return this.game.players.length === this.game.max_players && this.game.players.filter(p => p.Player.discord_id !== this.game.owner?.discord_id).every(p => p.Ready && p.Online);
   }
 
 }
