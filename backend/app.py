@@ -97,6 +97,13 @@ async def versus_socket(websocket: WebSocket):
         await websocket.close()
         return
 
+    @events.on("session_updated")
+    async def handle_update(_):
+        try:
+            await websocket.send_json({"action": "status", **session.get_status(user)})
+        except Exception:
+            events.remove_listener("session_updated", handle_update)
+
     versusManager.set_player_online(user, game_id)
 
     await websocket.send_json({"action": "status", **session.get_status(user)})
@@ -107,7 +114,13 @@ async def versus_socket(websocket: WebSocket):
             action = data.get("action")
             payload = data.get("data", {})
 
-            if action == "guess":
+            if action == "start":
+                try:
+                    versusManager.start_session(user, game_id)
+                except Exception as e:
+                    await websocket.send_json({"action": "error", "error": str(e)})
+
+            elif action == "guess":
                 try:
                     session.make_guess(user, payload.get("guess"))
                     await websocket.send_json({"action": "guess", **session.get_status(user)})
@@ -125,13 +138,8 @@ async def versus_socket(websocket: WebSocket):
             elif action == "status":
                 await websocket.send_json({"action": "status", **session.get_status(user)})
 
-            elif action == "ready":
-                versusManager.set_player_ready(user, game_id)
-                for conn in connectionManager.get_connections(game_id):
-                    await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
-
-            elif action == "unready":
-                versusManager.set_player_unready(user, game_id)
+            elif action == "toggle_ready":
+                versusManager.toggle_player_ready(user, game_id)
                 for conn in connectionManager.get_connections(game_id):
                     await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
 
@@ -140,9 +148,8 @@ async def versus_socket(websocket: WebSocket):
 
     except WebSocketDisconnect:
         connectionManager.disconnect(game_id, websocket)
-        if not connectionManager.get_connections(game_id):
-            # If no connections left, set the player offline
-            versusManager.set_player_offline(user, game_id)
+        versusManager.set_player_offline(user, game_id)
+        versusManager.set_player_unready(user, game_id)
 
 
 @app.post("/versus/create")

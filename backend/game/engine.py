@@ -160,10 +160,10 @@ class VersusGame:
                 player_state.online = True
                 break
 
-    def set_player_ready(self, user: User):
+    def toggle_player_ready(self, user: User):
         for player_state in self.players:
             if player_state.player.discord_id == user.discord_id:
-                player_state.ready = True
+                player_state.ready = not player_state.ready
                 break
 
     def set_player_unready(self, user: User):

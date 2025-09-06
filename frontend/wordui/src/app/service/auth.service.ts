@@ -23,6 +23,7 @@ export class AuthService {
   private onDataChangedEvent: Subject<AuthChangedResult> = new Subject<AuthChangedResult>();
 
   private id: number | undefined;
+  private discord_id: string | undefined;
   private discord_username: string | undefined;
   private discord_avatar: string | undefined;
 
@@ -39,7 +40,7 @@ export class AuthService {
   }
 
   get DiscordId(): string | undefined {
-    return this.id ? this.id.toString() : undefined;
+    return this.discord_id ? this.discord_id : undefined;
   }
 
   get DiscordUsername(): string | undefined {
@@ -55,7 +56,7 @@ export class AuthService {
   }
 
   set DiscordId(value: string | undefined) {
-    this.id = value ? parseInt(value, 10) : undefined;
+    this.discord_id = value;
   }
 
   set DiscordUsername(value: string | undefined) {
@@ -99,6 +100,7 @@ export class AuthService {
         result.event = AuthChangedEvent.UserDataFetched;
         result.data = data;
         this.Id = data.id;
+        this.DiscordId = data.discord_id;
         this.DiscordUsername = data.discord_username;
         this.DiscordAvatar = data.discord_avatar;
         return result;

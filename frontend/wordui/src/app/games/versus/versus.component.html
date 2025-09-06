@@ -1,7 +1,7 @@
 <p>Versus game</p>
-<p-dialog [modal]="true" [closable]="false" [draggable]="false" [(visible)]="visible" [styleClass]="'my-dialog'" [style]="{ width: '100%', height: '100%', maxHeight: '100%', borderRadius: '0' }">
+<p-dialog [modal]="true" [closable]="false" [draggable]="false" [visible]="this.game.status === VersusState.WAITING_FOR_PLAYERS" [styleClass]="'my-dialog'" [style]="{ width: '100%', height: '100%', maxHeight: '100%', borderRadius: '0' }">
     <div class="lobby">
-        <span class="lobby-title">Lobby</span>
+        <span class="lobby-title">Stanza</span>
         <div class="lobby-players">
             <div class="row">
                 <div class="player" *ngFor="let player of onlinePlayers()">
@@ -33,11 +33,24 @@
                 </div>
             </div>
             <div class="buttons">
-                <!--  [ngClass]="{ 'ready': isReady }" -->
-                <button class="btn" pRipple (click)="toggleReady()">{{ 'Ready' }}</button>
-                <!-- @if (this.myId !== game.owner?.discord_id) {
-                    <button class="btn start-btn" pRipple (click)="startGame()" [disabled]="!canStartGame()">Start game</button>
-                } -->
+                @if (this.myId === game.owner?.discord_id) {
+                    <button 
+                        class="btn start-btn" 
+                        [ngClass]="{ 'active': canStartGame() }"
+                        pRipple 
+                        (click)="startGame()" 
+                        [disabled]="!canStartGame()"
+                        [pTooltip]="!canStartGame() ? 'Tutti i giocatori devono mettere pronto!' : ''" tooltipPosition="top"
+                    >inizia</button>
+                } @else {
+                    <button class="btn" [ngClass]="{ 'ready': isPlayerReady() }" pRipple (click)="toggleReady()">
+                        @if (isPlayerReady()) {
+                            pronto
+                        } @else {
+                            non pronto
+                        }
+                    </button>
+                }
             </div>
         </div>
     </div>

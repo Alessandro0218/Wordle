@@ -238,7 +238,12 @@ export class VersusService {
   }
 
   toggleReady(): void {
-    const action = new GameAction(GameActionType.READY);
+    const action = new GameAction(GameActionType.TOGGLE_READY);
+    this.versusSocket.send(action);
+  }
+
+  startGame(): void {
+    const action = new GameAction(GameActionType.START);
     this.versusSocket.send(action);
   }
 

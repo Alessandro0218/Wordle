@@ -2,7 +2,7 @@
     <div class="servers-list">
         <div class="server" *ngFor="let server of servers" (click)="connectToServer(server.game_id)">
             <div class="header">
-                <div class="host">{{ server.name }} - {{ server.game_id }}</div>
+                <div class="host">{{ server.name }}</div>
                 <div class="max-players">{{ server.players.length }}/{{ server.max_players }}</div>
             </div>
             <div class="spacer"></div>
@@ -17,7 +17,7 @@
                     }
                 </div>
                 <div class="state">
-                    <div class="status">{{server.status}}</div>
+                    <div class="status">{{ currentGameStatus(server.status) }}</div>
                 </div>
             </div>
         </div>

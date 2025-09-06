@@ -15,8 +15,8 @@ export enum GameActionType {
   GUESS = 'guess',
   ERROR = 'error',
   LIST = 'list',
-  READY = 'ready',
-  UNREADY = 'unready',
+  START = 'start',
+  TOGGLE_READY = 'toggle_ready',
 }
 
 export class GameActionPayload {

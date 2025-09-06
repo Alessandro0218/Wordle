@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PlayerState, VersusGame } from 'domain/game';
+import { PlayerState, VersusGame, VersusState } from 'domain/game';
 import { DialogModule } from 'primeng/dialog';
-import { AuthService } from 'service/auth.service';
+import { AuthChangedEvent, AuthService } from 'service/auth.service';
 import { GameChangedEvent, VersusService } from 'service/game.service';
+import { TooltipModule } from "primeng/tooltip";
 
 @Component({
   selector: 'app-versus',
@@ -12,28 +13,33 @@ import { GameChangedEvent, VersusService } from 'service/game.service';
   imports: [
     CommonModule,
     DialogModule,
-  ],
+    TooltipModule
+],
   templateUrl: './versus.component.html',
   styleUrl: './versus.component.css'
 })
 export class VersusComponent implements OnInit, OnDestroy {
 
-  visible: boolean = false;
+  visible: boolean = true;
   game: VersusGame = new VersusGame();
 
   myId = this.authService.DiscordId;
 
   subscriptions: any[] = [];
 
+  VersusState = VersusState;
+
   constructor(
     private versusService: VersusService,
     private authService: AuthService,
     private route: ActivatedRoute,
   ) {}
+  
+  isPlayerReady(): boolean {
+    return this.game.players.find(p => p.Player.discord_id === this.myId)?.Ready || false;
+  }
 
   ngOnInit() {
-    this.visible = true;
-
     this.subscriptions.push(this.versusService.onJoinRoom().subscribe((game: VersusGame) => {
       this.game = game;
       this.versusService.connectToServer(game.game_id);
@@ -53,6 +59,18 @@ export class VersusComponent implements OnInit, OnDestroy {
         }
       }
     }));
+
+    this.authService.onDataChanged().subscribe({
+      next: (args) => {
+        switch (args.event) {
+          case AuthChangedEvent.UserDataFetched:
+            this.myId = this.authService.DiscordId;
+            break;
+          default:
+            break;
+        }
+      }
+    });
 
     this.connectoToGame();
 
@@ -79,6 +97,17 @@ export class VersusComponent implements OnInit, OnDestroy {
 
   onlinePlayers(): PlayerState[] {
     return this.game.players.filter(p => p.online);
+  }
+
+  startGame(): void {
+    this.versusService.startGame();
+  }
+
+  canStartGame(): boolean {
+    if (this.myId !== this.game.owner?.discord_id) {
+      return false;
+    }
+    return this.game.players.filter(p => p.Player.discord_id !== this.game.owner?.discord_id).every(p => p.Ready);
   }
 
 }

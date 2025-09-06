@@ -215,3 +215,9 @@ export class VersusGame {
         };
     }
 }
+
+export enum VersusState {
+    WAITING_FOR_PLAYERS,
+    IN_PROGRESS,
+    FINISHED
+}

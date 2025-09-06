@@ -49,6 +49,19 @@ export class ServersListComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {}
 
+  currentGameStatus(state: number): string {
+    switch(state) {
+      case 0:
+        return "In attesa di giocatori";
+      case 1:
+        return "In corso";
+      case 2:
+        return "Terminato";
+      default:
+        return "Stato sconosciuto";
+    }
+  }
+
   ngOnInit() {
     this.versusService.connectList();
     this.subscriptions.push(this.versusService.onDataChanged().subscribe({

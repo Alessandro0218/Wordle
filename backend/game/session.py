@@ -84,11 +84,11 @@ class VersusManager:
         session.set_player_online(user)
         events.emit("session_updated", self.list_sessions())
 
-    def set_player_ready(self, user: User, game_id):
+    def toggle_player_ready(self, user: User, game_id):
         session = self.sessions.get(game_id)
         if not session:
             return
-        session.set_player_ready(user)
+        session.toggle_player_ready(user)
         events.emit("session_updated", self.list_sessions())
 
     def set_player_unready(self, user: User, game_id):

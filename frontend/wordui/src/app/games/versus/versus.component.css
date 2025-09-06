@@ -128,4 +128,22 @@
     font-size: 18px;
     color: #333;
     letter-spacing: -0.5px;
+    text-transform: capitalize;
+}
+
+.btn.ready {
+    background: var(--color-correct);
+    color: white;
+    font-weight: bold;
+}
+
+.btn.active {
+    background: var(--color-correct);
+    color: white;
+    font-weight: bold;
+}
+
+.btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
 }
