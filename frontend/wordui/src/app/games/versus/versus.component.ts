@@ -72,6 +72,35 @@ export class VersusComponent implements OnInit, OnDestroy {
     return this.game.players.find(p => p.Player.discord_id === this.myId)?.Ready || false;
   }
 
+  get friends(): PlayerState[] {
+    return this.game.players.filter(p => p.Player.discord_id !== this.myId && p.Online);
+  }
+
+  friendsRows(friend: PlayerState): number[] {
+    return Array.from({ length: friend.Game.MaxGuess }, (_, i) => i);
+  }
+
+  friendsColumns(friend: PlayerState): number[] {
+    return Array.from({ length: friend.Game.WordLength }, (_, i) => i);
+  }
+
+  getFriendLetterState(friend: PlayerState, guessIndex: number, letterIndex: number) {
+    const guess = friend.Game.Guesses[guessIndex];
+    if (!guess) return '';
+
+    const status = guess.status[letterIndex];
+    switch (status) {
+      case WordStatus.CORRECT:
+        return 'correct';
+      case WordStatus.PRESENT:
+        return 'present';
+      case WordStatus.ABSENT:
+        return 'absent';
+      default:
+        return '';
+    }
+  }
+
   @HostListener('window:keydown', ['$event'])
   handleKeydown(event: KeyboardEvent) {
     if (['Backspace', 'Enter'].includes(event.key)) {
@@ -115,6 +144,9 @@ export class VersusComponent implements OnInit, OnDestroy {
             break;
           case GameChangedEvent.WordNotValid:
             this.shakeAnimation = true;
+            setTimeout(() => {
+              this.shakeAnimation = false;
+            }, 500);
             break;
           default:
             break;

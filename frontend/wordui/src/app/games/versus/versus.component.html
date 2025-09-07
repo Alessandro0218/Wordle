@@ -1,3 +1,21 @@
+<div class="container">
+    @for (friend of friends; track $index) {
+        <div class="friends">
+            <div class="friend-header">
+                <div class="friend-username">{{ friend.Player.discord_username }}</div>
+            </div>
+            <div class="friend-grid">
+                @for (guess of friendsRows(friend); track guess; let guessIndex = $index) {
+                    <div class="friend-row">
+                        @for (item of friendsColumns(friend); track item; let letterIndex = $index) {
+                            <div class="friend-cell" [ngClass]="getFriendLetterState(friend, guessIndex, letterIndex)"></div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
 <div class="col">
     <div class="grid" [ngStyle]="{'grid-template-rows': 'repeat(' + MAX_GUESSES + ', 1fr)'}">
         <div 

@@ -1,4 +1,5 @@
 :host {
+    position: relative;
     width: 100%;
     height: 100%;
 }
@@ -339,4 +340,67 @@
     100% {
         transform: translateX(0);
     }
+}
+
+.container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    width: min-content;
+    padding: 2em 1em 0em 1em;
+    gap: 25px;
+}
+
+.friends {
+    border: 2px solid var(--border-light);
+    min-width: 80px;
+    height: auto;
+    left: 10px;
+    top: 2em;
+    border-radius: 5px;
+}
+
+.friend-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--border-light);
+    height: 20px;
+    padding: 0 5px;
+}
+
+.friend-username {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+    color: var(--tile-text-color);
+    font-size: 1em;
+    text-align: center;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.friend-grid {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    gap: 5px;
+    padding: 5px 5px;
+    height: calc(100% - 20px);
+}
+
+.friend-row {
+    display: grid;
+    gap: 5px;
+    grid-template-columns: repeat(5, 1fr);
+    /* background-color: red; */
+    width: 100%;
+}
+
+.friend-cell {
+    background-color: var(--border-light);
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 2px;
 }
