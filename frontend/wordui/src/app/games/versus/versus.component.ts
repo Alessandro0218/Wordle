@@ -96,17 +96,22 @@ export class VersusComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(this.versusService.onDataChanged().subscribe({
       next: (args) => {
+        const data = args.data as VersusGame;  
         switch (args.event) {
           case GameChangedEvent.EnterSuccess:
             this.game = args.data;
-            this.myGuesses = this.myGame.Guesses;
             break;
           case GameChangedEvent.StatusSuccess:
-            this.game = args.data;
+            this.game = data;
+            this.myGame.Guesses.forEach((guess, index) => {
+              if (index !== this.currentIndex) {
+                this.myGuesses[index] = guess;
+              }
+            });
             break;
           case GameChangedEvent.GuessSuccess:
-            this.game = args.data;
-            this.myGuesses = this.myGame.Guesses;
+            this.game = data;
+            this.word = '';
             break;
           case GameChangedEvent.WordNotValid:
             this.shakeAnimation = true;

@@ -84,6 +84,14 @@ class VersusManager:
         except Exception as e:
             raise e
 
+    def make_guess(self, user: User, game_id: str, guess: str):
+        session = self.sessions.get(game_id)
+        if not session:
+            raise ValueError(GameErrorType.SESSION_NOT_FOUND)
+        result = session.make_guess(user, guess)
+        events.emit("session_updated", self.list_sessions())
+        return result
+
     def get_session(self, game_id: str) -> VersusGame | None:
         return self.sessions.get(game_id)
 

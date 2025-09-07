@@ -122,7 +122,7 @@ async def versus_socket(websocket: WebSocket):
 
             elif action == "guess":
                 try:
-                    session.make_guess(user, payload.get("guess"))
+                    versusManager.make_guess(user, game_id, payload.get("guess"))
                     await websocket.send_json({"action": "guess", **session.get_status(user)})
                     for conn in connectionManager.get_connections(game_id):
                         if conn != websocket:
