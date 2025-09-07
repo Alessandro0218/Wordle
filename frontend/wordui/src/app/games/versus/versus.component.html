@@ -1,0 +1,133 @@
+<div class="container">
+    @for (friend of friends; track $index) {
+        <div class="friends">
+            <div class="friend-header">
+                <div class="friend-username">{{ friend.Player.discord_username }}</div>
+            </div>
+            <div class="friend-grid">
+                @for (guess of friendsRows(friend); track guess; let guessIndex = $index) {
+                    <div class="friend-row">
+                        @for (item of friendsColumns(friend); track item; let letterIndex = $index) {
+                            <div class="friend-cell" [ngClass]="getFriendLetterState(friend, guessIndex, letterIndex)"></div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+<div class="col">
+    <div class="grid" [ngStyle]="{'grid-template-rows': 'repeat(' + MAX_GUESSES + ', 1fr)'}">
+        <div 
+            class="game-row" 
+            *ngFor="let guess of guesses; let row = index; trackBy: trackByFn" 
+            [ngStyle]="{'grid-template-columns': 'repeat(' + MAX_LENGTH + ', 1fr)'}"
+            [ngClass]="{'shakes': myGame.CurrentGuess === row && this.shakeAnimation}">
+            <div 
+                class="cell" 
+                *ngFor="let letter of guess.word.split(''); let column = index;" 
+                [ngStyle]="{
+                    'background-color': getLetterColor(row, column),
+                    'animation-delay': (row * 0.1 + column * 0.05) + 's',
+                }"
+                [ngClass]="getLetterColor(row, column)"
+            >
+                {{ letter }}
+            </div>
+        </div>
+    </div>
+    <div class="keyboard">
+        <div class="keyboard-row">
+            <button class="key" (click)="emulateKeydown('Q')" [ngClass]="keyboardLettersColor('q')">Q</button>
+            <button class="key" (click)="emulateKeydown('W')" [ngClass]="keyboardLettersColor('w')">W</button>
+            <button class="key" (click)="emulateKeydown('E')" [ngClass]="keyboardLettersColor('e')">E</button>
+            <button class="key" (click)="emulateKeydown('R')" [ngClass]="keyboardLettersColor('r')">R</button>
+            <button class="key" (click)="emulateKeydown('T')" [ngClass]="keyboardLettersColor('t')">T</button>
+            <button class="key" (click)="emulateKeydown('Y')" [ngClass]="keyboardLettersColor('y')">Y</button>
+            <button class="key" (click)="emulateKeydown('U')" [ngClass]="keyboardLettersColor('u')">U</button>
+            <button class="key" (click)="emulateKeydown('I')" [ngClass]="keyboardLettersColor('i')">I</button>
+            <button class="key" (click)="emulateKeydown('O')" [ngClass]="keyboardLettersColor('o')">O</button>
+            <button class="key" (click)="emulateKeydown('P')" [ngClass]="keyboardLettersColor('p')">P</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key" (click)="emulateKeydown('A')" [ngClass]="keyboardLettersColor('a')">A</button>
+            <button class="key" (click)="emulateKeydown('S')" [ngClass]="keyboardLettersColor('s')">S</button>
+            <button class="key" (click)="emulateKeydown('D')" [ngClass]="keyboardLettersColor('d')">D</button>
+            <button class="key" (click)="emulateKeydown('F')" [ngClass]="keyboardLettersColor('f')">F</button>
+            <button class="key" (click)="emulateKeydown('G')" [ngClass]="keyboardLettersColor('g')">G</button>
+            <button class="key" (click)="emulateKeydown('H')" [ngClass]="keyboardLettersColor('h')">H</button>
+            <button class="key" (click)="emulateKeydown('J')" [ngClass]="keyboardLettersColor('j')">J</button>
+            <button class="key" (click)="emulateKeydown('K')" [ngClass]="keyboardLettersColor('k')">K</button>
+            <button class="key" (click)="emulateKeydown('L')" [ngClass]="keyboardLettersColor('l')">L</button>
+        </div>
+        <div class="keyboard-row">
+            <button class="key flex-2" (click)="emulateKeydown('Enter')">Enter</button>
+            <button class="key" (click)="emulateKeydown('Z')" [ngClass]="keyboardLettersColor('z')">Z</button>
+            <button class="key" (click)="emulateKeydown('X')" [ngClass]="keyboardLettersColor('x')">X</button>
+            <button class="key" (click)="emulateKeydown('C')" [ngClass]="keyboardLettersColor('c')">C</button>
+            <button class="key" (click)="emulateKeydown('V')" [ngClass]="keyboardLettersColor('v')">V</button>
+            <button class="key" (click)="emulateKeydown('B')" [ngClass]="keyboardLettersColor('b')">B</button>
+            <button class="key" (click)="emulateKeydown('N')" [ngClass]="keyboardLettersColor('n')">N</button>
+            <button class="key" (click)="emulateKeydown('M')" [ngClass]="keyboardLettersColor('m')">M</button>
+            <button class="key flex-2" (click)="emulateKeydown('Backspace')">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20" class="game-icon" data-testid="icon-backspace"><path fill="var(--color-tone-1)" d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H7.07L2.4 12l4.66-7H22v14zm-11.59-2L14 13.41 17.59 17 19 15.59 15.41 12 19 8.41 17.59 7 14 10.59 10.41 7 9 8.41 12.59 12 9 15.59z"></path></svg>
+            </button>
+        </div>
+    </div>
+</div>
+<p-dialog [modal]="true" [closable]="false" [draggable]="false" [visible]="this.game.status === VersusState.WAITING_FOR_PLAYERS" [styleClass]="'my-dialog'" [style]="{ width: '100%', height: '100%', maxHeight: '100%', borderRadius: '0' }">
+    <div class="lobby">
+        <span class="lobby-title">Stanza</span>
+        <div class="lobby-players">
+            <div class="row">
+                <div class="player" *ngFor="let player of onlinePlayers()">
+                    @if (player.Player.discord_id == game.owner?.discord_id || player.Ready) {
+                        <div 
+                            class="player-state"
+                            [ngClass]="{ 
+                                'ready': player.Ready,
+                                'owner': player.Player.discord_id == game.owner?.discord_id
+                            }"
+                        >
+                            @if (player.Player.discord_id == game.owner?.discord_id) {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M6.327 19q-.212 0-.356-.144t-.144-.357t.144-.356t.356-.143h11.346q.213 0 .356.144t.144.357t-.144.356t-.356.143zm.777-2.884q-.59 0-1.028-.37t-.562-.94L4.32 8.475q-.05.02-.112.022q-.063.003-.113.003q-.471 0-.783-.32T3 7.404q0-.473.313-.804q.312-.33.784-.33t.803.33q.33.331.33.804q0 .104-.008.193t-.059.176l2.76 1.111q.192.077.385.02q.192-.058.326-.231l2.702-3.66q-.217-.142-.344-.376q-.127-.233-.127-.503q0-.472.331-.803q.33-.331.803-.331q.472 0 .804.33t.332.8q0 .284-.127.512q-.127.23-.344.371l2.702 3.66q.134.173.326.23q.193.059.385-.018l2.76-1.112q-.027-.08-.047-.175q-.02-.096-.02-.194q0-.473.312-.804q.312-.33.784-.33t.803.33q.331.331.331.804q0 .454-.332.775t-.806.321q-.038 0-.086-.012t-.106-.013l-1.184 6.33q-.125.572-.562.941t-1.028.37z"/></svg>
+                            } @else if (player.Ready) {
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path fill="currentColor" d="M8.294 16.998c-.435 0-.847-.203-1.111-.553L3.61 11.724a1.39 1.39 0 0 1 .27-1.951a1.39 1.39 0 0 1 1.953.27l2.351 3.104l5.911-9.492a1.396 1.396 0 0 1 1.921-.445c.653.406.854 1.266.446 1.92L9.478 16.34a1.39 1.39 0 0 1-1.12.656z"/></svg>
+                            }
+                        </div>
+                    }
+                    <img 
+                        class="avatar" 
+                        [ngClass]="{
+                            'owner': player.Player.discord_id == game.owner?.discord_id,
+                            'ready': player.Ready,
+                        }" 
+                        [src]="'https://cdn.discordapp.com/avatars/'+player.Player.discord_id+'/'+player.Player.discord_avatar+'.webp?size=128'" 
+                        alt="avatar"
+                    >
+                    <span class="username">{{ player.Player.discord_username }}</span>
+                </div>
+            </div>
+            <div class="buttons">
+                @if (this.myId === game.owner?.discord_id) {
+                    <button 
+                        class="btn start-btn" 
+                        [ngClass]="{ 'active': canStartGame() }"
+                        pRipple 
+                        (click)="startGame()" 
+                        [disabled]="!canStartGame()"
+                        [pTooltip]="!canStartGame() ? 'Tutti i giocatori devono mettere pronto!' : ''" tooltipPosition="top"
+                    >inizia</button>
+                } @else {
+                    <button class="btn" [ngClass]="{ 'ready': isPlayerReady }" pRipple (click)="toggleReady()">
+                        @if (isPlayerReady) {
+                            pronto
+                        } @else {
+                            non pronto
+                        }
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</p-dialog>

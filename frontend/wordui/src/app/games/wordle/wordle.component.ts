@@ -84,20 +84,20 @@ export class WordleComponent implements OnInit {
         if (result.event === GameChangedEvent.StartSuccess) {
           const data = result.data as Game;
           console.log('Game started successfully:', result.data);
-          this.game.fromJson(data);
+          this.game.from_json(data);
           if (this.game.GameId) localStorage.setItem('game_id', this.game.GameId);
           this.wsService.connect(this.game.GameId);
 
         } else if (result.event === GameChangedEvent.GuessSuccess) {
           console.log('Guess submitted successfully:', result.data);
           const data = result.data as Game;
-          this.game.fromJson(data);
+          this.game.from_json(data);
           this.word = '';
           
         } else if (result.event === GameChangedEvent.StatusSuccess) {
           const data = result.data as Game;
           console.log('Game status updated:', data);
-          this.game.fromJson(data);
+          this.game.from_json(data);
 
         } else if (result.event === GameChangedEvent.GameNotFound) {
           console.warn('Game not found, starting a new game.');

@@ -1,1 +1,8 @@
-<p>menu works!</p>
+<div class="col">
+    <button class="mode" [disabled]="!this.authService.isLoggedIn" (click)="onSelectionMode(Mode.VERSUS)">
+        PVP
+    </button>
+    <button class="mode" [disabled]="!this.authService.isLoggedIn" (click)="onSelectionMode(Mode.WORDLE)">
+        Wordle Experience
+    </button>
+</div>

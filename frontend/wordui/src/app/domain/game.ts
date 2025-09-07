@@ -1,4 +1,5 @@
 import { GameActionType } from "../service/websocket.service";
+import { User } from "./user";
 
 export enum GameState {
     ONGOING,
@@ -88,13 +89,13 @@ export class Game {
         ).filter(letter => letter !== ''))];
     }
 
-    fromJson(json: any): Game {
+    from_json(json: any): Game {
         this.action = json.action as GameActionType;
         this.game_id = json.game_id;
         this.status = json.status as GameState;
         this.max_guess = json.max_guess;
         this.current_guess = json.current_guess;
-        this.guesses = json.guesses.map((guess: Guess) => new Guess(guess.word.toUpperCase(), guess.status)).concat(
+        this.guesses = json.guesses.map((guess: any) => new Guess(guess.word.toUpperCase(), guess.status)).concat(
             Array.from({ length: this.max_guess - json.guesses.length }, () => new Guess(' '.repeat(this.word_length), Array(this.max_guess).fill(0)))
         );
         return this;
@@ -122,4 +123,101 @@ export class Guess {
             status: this.status
         };
     }
+}
+
+export class PlayerState {
+    player: User;
+    ready: boolean;
+    online: boolean;
+    game: Game;
+
+    constructor(player: User = new User(), ready: boolean = false, online: boolean = false, game: Game = new Game()) {
+        this.player = player;
+        this.ready = ready;
+        this.online = online;
+        this.game = game;
+    }
+    
+    get Player() {
+        return this.player;
+    }
+    get Ready() {
+        return this.ready;
+    }
+    get Online() {
+        return this.online;
+    }
+    get Game() {
+        return this.game;
+    }
+
+    set Player(player: User) {
+        this.player = player;
+    }
+    set Ready(ready: boolean) {
+        this.ready = ready;
+    }
+    set Online(online: boolean) {
+        this.online = online;
+    }
+    set Game(game: Game) {
+        this.game = game;
+    }
+
+    from_json(json: any) {
+        this.player = new User().from_json(json.player);
+        this.ready = json.ready;
+        this.online = json.online;
+        this.game = new Game().from_json(json.game);
+        return this;
+    }
+
+    to_json() {
+        return {
+            player: this.player,
+            ready: this.ready,
+            online: this.online,
+            game: this.game
+        };
+    }
+
+}
+
+export class VersusGame {
+    action: string = '';
+    game_id: string = '';
+    status: number = 0;
+    winner: User | undefined;
+    players: PlayerState[] = [];
+    max_players: number = 0;
+    owner: User | undefined;
+
+    from_json(json: any): VersusGame {
+        this.action = json.action;
+        this.game_id = json.game_id;
+        this.status = json.status;
+        this.winner = json.winner ? new User().from_json(json.winner) : undefined;
+        this.players = json.players.map((player: User) => new PlayerState().from_json(player));
+        this.max_players = json.max_players;
+        this.owner = json.owner ? new User().from_json(json.owner) : undefined;
+        return this;
+    }
+
+    to_json(): any {
+        return {
+            action: this.action,
+            game_id: this.game_id,
+            status: this.status,
+            winner: this.winner ? this.winner.to_json() : undefined,
+            players: this.players.map(player => player.to_json()),
+            max_players: this.max_players,
+            owner: this.owner ? this.owner.to_json() : undefined
+        };
+    }
+}
+
+export enum VersusState {
+    WAITING_FOR_PLAYERS,
+    IN_PROGRESS,
+    FINISHED
 }

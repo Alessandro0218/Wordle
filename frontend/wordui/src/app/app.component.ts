@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.authService.onDataChanged().subscribe((AuthChangedResult) => {
       if (AuthChangedResult.event === AuthChangedEvent.UserDataFetched) {
-        this.userData = new User().fromJson(AuthChangedResult.data);
+        this.userData = new User().from_json(AuthChangedResult.data);
       } else if (AuthChangedResult.event === AuthChangedEvent.UserDataError) {
         console.error('Error fetching user data:', AuthChangedResult.data);
       }

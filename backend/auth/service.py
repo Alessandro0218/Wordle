@@ -4,13 +4,13 @@ import requests
 from fastapi.responses import RedirectResponse
 
 from backend.auth.database import Database
+from backend.auth.domain import User
 from backend.auth.jwt import create_jwt_token, verify_jwt_token
 
 
 def callbackLogic(code: str):
     CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", "")
     CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", "")
-    print(f"{CLIENT_ID=}, {CLIENT_SECRET=}")
     token_response = requests.post(
         "https://discord.com/api/oauth2/token",
         data={
@@ -39,8 +39,6 @@ def callbackLogic(code: str):
         return {"error": user_response.text, "status_code": user_response.status_code}
 
     user_data = user_response.json()
-
-    print(f"{user_data=}, {token_data=}")
 
     db = Database()
     user = db.create_user(
@@ -71,7 +69,7 @@ def callbackLogic(code: str):
     return response
 
 
-def get_user_data_from_token(token: str):
+def get_user_data_from_token(token: str) -> User:
     user_data = verify_jwt_token(token)
     if not user_data:
         raise ValueError("Invalid or expired token")
@@ -79,9 +77,5 @@ def get_user_data_from_token(token: str):
     user = db.get_user_by_id(user_data["user_id"])
     if not user:
         raise ValueError("User not found")
-    return {
-        "id": user.id,
-        "discord_id": user.discord_id,
-        "discord_username": user.discord_username,
-        "discord_avatar": user.discord_avatar,
-    }
+
+    return User(**user.__dict__)

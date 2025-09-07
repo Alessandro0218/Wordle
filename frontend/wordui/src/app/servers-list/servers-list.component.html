@@ -1,0 +1,54 @@
+<div class="grid">
+    <div class="servers-list">
+        @for (server of servers; track $index) {
+        <div class="server" (click)="connectToServer(server.game_id)">
+            <div class="header">
+                <div class="host">{{ server.name }}</div>
+                <div class="max-players">{{ server.players.length }}/{{ server.max_players }}</div>
+            </div>
+            <div class="spacer"></div>
+            <div class="footer">
+                <div class="players">
+                    @for (player_state of server.players; track $index) {
+                    @if (player_state.online) {
+                    <img class="avatar" [pTooltip]="player_state.player.discord_username" tooltipPosition="top"
+                        [src]="'https://cdn.discordapp.com/avatars/'+player_state.player.discord_id+'/'+player_state.player.discord_avatar+'.webp?size=32'"
+                        alt="avatar">
+                    } @else {
+                    <img class="avatar offline" [pTooltip]="player_state.player.discord_username + ' (offline)'"
+                        tooltipPosition="top"
+                        [src]="'https://cdn.discordapp.com/avatars/'+player_state.player.discord_id+'/'+player_state.player.discord_avatar+'.webp?size=32'"
+                        alt="avatar">
+                    }
+                    }
+                </div>
+                <div class="state">
+                    <div class="status">{{ currentGameStatus(server.status) }}</div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+    <div class="buttons">
+        <button class="btn" (click)="showCreateDialog()">Create room</button>
+        <button class="btn" (click)="showEnterDialog()" [disabled]="!servers.length">Enter room</button>
+    </div>
+</div>
+<p-dialog header="Create room" [modal]="true" [draggable]="false" [(visible)]="createDialogVisibility"
+    [style]="{ width: '25rem' }">
+    <form class="form" [formGroup]="createRoom">
+        <label for="username">Name:</label>
+        <input type="text" pInputText formControlName="name" />
+        <label for="maxPlayers">Max Players:</label>
+        <p-inputNumber id="maxPlayers" inputId="integeronly" min="2" max="6" formControlName="maxPlayers" />
+        <p-button class="submit-btn" pRipple label="Submit" (click)="onSubmitCreate()" />
+    </form>
+</p-dialog>
+<p-dialog header="Enter room" [modal]="true" [draggable]="false" [(visible)]="enterDialogVisibility"
+    [style]="{ width: '25rem' }">
+    <form class="form" [formGroup]="enterRoom">
+        <label for="username">CODE:</label>
+        <input type="text" pInputText formControlName="code" />
+        <p-button class="submit-btn" pRipple label="Submit" (click)="onSubmitEnter()" />
+    </form>
+</p-dialog>

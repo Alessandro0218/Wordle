@@ -1,0 +1,157 @@
+:host {
+    width: 100%;
+    height: 100%;
+    padding: 60px;
+}
+
+input,
+.p-inputtext:enabled:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.grid {
+    display: inline-flex;
+    width: 100%;
+    height: 100%;
+    gap: 50px;
+    flex-wrap: wrap;
+}
+
+.servers-list {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    outline: 2px solid #ccc;
+    flex: 1;
+    border-radius: .5rem;
+    overflow-y: scroll;
+    height: 100%;
+
+}
+
+.buttons {
+    max-width: 250px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.buttons .btn {
+    width: 100%;
+    height: 48px;
+    background: #f0f0f0;
+    border: 0;
+    outline: none;
+    cursor: pointer;
+    border-radius: .5rem;
+    font-family: 'Arial', sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+    color: #333;
+    letter-spacing: -0.5px;
+}
+
+.buttons .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.servers-list .server {
+    padding: 12px 16px;
+    background: var(--keyboard-background);
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+}
+
+.server .header {
+    display: inline-flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.server .spacer {
+    height: 100px;
+}
+
+.server .footer {
+    display: inline-flex;
+    justify-content: space-between;
+}
+
+.server .footer .players {
+    --avatar-size: 32px;
+    display: grid;
+    grid-template-columns: repeat(3, calc(var(--avatar-size) / 1.5));
+}
+
+.server .footer .players .avatar {
+    width: var(--avatar-size);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid var(--keyboard-background);
+    box-shadow: .25rem .25rem .5rem rgba(0, 0, 0, 0.2);
+    background-color: #f0f0f0;
+}
+
+.avatar.offline {
+    filter: grayscale(100%) brightness(90%);
+    opacity: 0.6;
+}
+
+.server .host,
+.server .max-players,
+.server .status {
+    color: white;
+    font-family: 'Arial', sans-serif;
+    font-size: 20px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.submit-btn {
+    width: min-content;
+}
+
+@media screen and (max-width: 768px) {
+    .grid {
+        flex-direction: column-reverse;
+    }
+
+    .servers-list,
+    .buttons {
+        max-width: 100%;
+    }
+
+    .buttons {
+        flex: none;
+    }
+}
+
+/* CUSTOM SCROLL BAR */
+.servers-list::-webkit-scrollbar {
+    /* background: #2d2d2d; */
+    width: 10px;
+    z-index: -1;
+}
+
+.servers-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 5px;
+}
+
+.servers-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
