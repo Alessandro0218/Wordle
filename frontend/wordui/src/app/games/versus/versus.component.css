@@ -404,3 +404,12 @@
     aspect-ratio: 1;
     border-radius: 2px;
 }
+
+
+.end-dialog {
+    padding: 0 1rem;
+    background-color: var(--header-background);
+    color: var(--tile-text-color);
+    user-select: none;
+    text-align: center;
+}

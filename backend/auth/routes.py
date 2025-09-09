@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 
 from backend.auth.service import callbackLogic, get_user_data_from_token
 
@@ -27,7 +27,8 @@ def require_user_token(request: Request):
 @router.get("/discord/login")
 def login():
     return RedirectResponse(
-        url="https://discord.com/oauth2/authorize?client_id=1385329136553431050&response_type=code&redirect_uri=http%3A%2F%2F192.168.0.2%3A8000%2Fauth%2Fdiscord%2Fcallback&scope=identify"
+        url="https://discord.com/oauth2/authorize?client_id=1385329136553431050&response_type=code"
+        "&redirect_uri=http%3A%2F%2F192.168.0.2%3A8000%2Fauth%2Fdiscord%2Fcallback&scope=identify"
     )
 
 
@@ -39,3 +40,17 @@ def callback(code: str):
 @router.get("/user")
 def get_user(user_token: str = Depends(require_user_token)):
     return get_user_data_from_token(user_token)
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response = JSONResponse(status_code=200, content={"message": "Logged out successfully"})
+    response.delete_cookie(
+        key="user_token",
+        path="/",
+        domain="192.168.0.2",
+        httponly=True,
+        secure=False,
+        samesite="lax",
+    )
+    return response

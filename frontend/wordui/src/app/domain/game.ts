@@ -2,7 +2,7 @@ import { GameActionType } from "../service/websocket.service";
 import { User } from "./user";
 
 export enum GameState {
-    ONGOING,
+    ONGOING = 1,
     WON,
     LOST
 }

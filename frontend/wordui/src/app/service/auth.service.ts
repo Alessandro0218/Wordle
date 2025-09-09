@@ -7,6 +7,8 @@ import { User } from '../domain/user';
 export enum AuthChangedEvent {
   UserDataFetched,
   UserDataError,
+  LoggedOut,
+  LoggedOutError
 }
 
 export class AuthChangedResult {
@@ -76,6 +78,21 @@ export class AuthService {
     window.location.href = url;
   }
 
+  logout() {
+    this.postLogoutRequest().subscribe({
+      next: (result) => {
+        this.Id = undefined;
+        this.DiscordId = undefined;
+        this.DiscordUsername = undefined;
+        this.DiscordAvatar = undefined;
+        this.onDataChangedEvent.next({ event: AuthChangedEvent.LoggedOut, data: result });
+      },
+      error: (error) => {
+        this.onDataChangedEvent.next({ event: AuthChangedEvent.LoggedOutError, data: error });
+      }
+    });
+  }
+
   fetchUserData(timeoutValue: number = this.DEFAULT_TIMEOUT): void {
     this.fetchUserDataRequest(timeoutValue).subscribe({
       next: (result: AuthChangedResult) => {
@@ -110,6 +127,17 @@ export class AuthService {
         result.event = AuthChangedEvent.UserDataError;
         result.data = error;
         return [result];
+      })
+    );
+  }
+
+  postLogoutRequest(timeoutValue: number = this.DEFAULT_TIMEOUT): Observable<any> {
+    const url = `${environment.HOST}:${environment.PORT}/auth/logout`;
+    return this.http.post(url, {}, { withCredentials: true }).pipe(
+      timeout(timeoutValue),
+      catchError((error: any) => {
+        console.error('Logout error:', error);
+        return [error];
       })
     );
   }

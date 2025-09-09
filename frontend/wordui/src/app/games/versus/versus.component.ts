@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Game, Guess, PlayerState, VersusGame, VersusState, WordStatus } from 'domain/game';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Game, GameState, Guess, PlayerState, VersusGame, VersusState, WordStatus } from 'domain/game';
 import { DialogModule } from 'primeng/dialog';
 import { AuthChangedEvent, AuthService } from 'service/auth.service';
 import { GameChangedEvent, VersusService } from 'service/game.service';
@@ -44,14 +44,23 @@ export class VersusComponent implements OnInit, OnDestroy {
 
   myGuesses: Guess[] = Array(this.MAX_GUESSES).fill(new Guess(' '.repeat(this.MAX_LENGTH), []));
 
+  hideModal: boolean = false;
+
   constructor(
     private versusService: VersusService,
     private authService: AuthService,
     private route: ActivatedRoute,
+    private router: Router,
   ) { }
 
   get myGame(): Game {
     return this.game.players.find(p => p.Player.discord_id === this.myId)?.Game || new Game();
+  }
+  get isGameWon(): boolean {
+    return !this.hideModal && this.myGame.GameStatus === GameState.WON;
+  }
+  get isGameLost(): boolean {
+    return !this.hideModal && this.myGame.GameStatus === GameState.LOST;
   }
   
   get currentIndex() {
@@ -129,6 +138,9 @@ export class VersusComponent implements OnInit, OnDestroy {
         switch (args.event) {
           case GameChangedEvent.EnterSuccess:
             this.game = args.data;
+            break;
+          case GameChangedEvent.EnterError:
+            this.navigateToList();
             break;
           case GameChangedEvent.StatusSuccess:
             this.game = data;
@@ -283,5 +295,9 @@ export class VersusComponent implements OnInit, OnDestroy {
 
   trackByFn(index: number) {
     return index;
+  }
+
+  navigateToList() {
+    this.router.navigate(['/servers-list']);
   }
 }

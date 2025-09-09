@@ -126,9 +126,6 @@ class VersusGame:
         self.players.append(PlayerState(player, self.word))
 
     def make_guess(self, player: User, guess: str):
-        if self.status != VersusGameStatus.IN_PROGRESS:
-            raise ValueError(GameErrorType.GAME_ALREADY_FINISHED)
-
         if player.discord_id not in [p.player.discord_id for p in self.players]:
             raise ValueError(GameErrorType.INVALID_PLAYER)
 

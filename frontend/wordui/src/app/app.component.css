@@ -26,6 +26,7 @@
     border-radius: 50%;
     fill: var(--border);
     color: var(--tile-text-color);
+    overflow: hidden;
 }
 
 .container {
@@ -48,4 +49,29 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+}
+
+.header-menu::ng-deep .p-menu {
+    padding: 0;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    gap: 5px;
+    background-color: var(--header-background);
+}
+
+.buttons .btn {
+    width: 100%;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+    outline: none;
+}
+
+.buttons .btn:hover {
+    background-color: var(--border);
 }
