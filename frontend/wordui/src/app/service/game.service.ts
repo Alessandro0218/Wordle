@@ -157,6 +157,14 @@ export class VersusService {
     });
   }
 
+  isGameConnected(): boolean {
+    return this.versusSocket.isGameConnected();
+  }
+
+  isListConnected(): boolean {
+    return this.versusSocket.isListConnected();
+  }
+
   onDataChanged(): Observable<GameChangedResult> {
     return this.onDataChangedEvent.asObservable();
   }

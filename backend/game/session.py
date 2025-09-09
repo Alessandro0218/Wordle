@@ -45,12 +45,12 @@ class VersusManager:
                 continue
             await asyncio.sleep(1)
             for session in self.sessions.values():
-                if session.status == VersusGameStatus.FINISHED:
-                    self.remove_session(session.game_id)
-                    continue
                 if all(not p.online for p in session.players):
+                    if session.status == VersusGameStatus.FINISHED:
+                        self.remove_session(session.game_id)
+                        continue
                     if time.time() - session._last_active > session.MAX_INACTIVITY_TIME:
-                        session.destroy()
+                        session.mark_as_ended()
                 else:
                     session._touch()
 

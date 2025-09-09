@@ -75,3 +75,19 @@
 .buttons .btn:hover {
     background-color: var(--border);
 }
+
+::ng-deep .p-toast .p-toast-message.p-toast-message-error {
+    background-color: rgb(255, 231, 230) !important;
+}
+
+::ng-deep .p-toast .p-toast-message.p-toast-message-warn {
+    background-color: rgb(255, 242, 226) !important;
+}
+
+::ng-deep .p-toast .p-toast-message.p-toast-message-success {
+    background-color: rgb(228, 248, 240) !important;
+}
+
+::ng-deep .p-toast .p-toast-message.p-toast-message-info {
+    background-color: rgb(219, 234, 254) !important;
+}

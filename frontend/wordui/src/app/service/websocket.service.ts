@@ -1,8 +1,9 @@
 // websocket.service.ts
 import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, delay, Observable, retry, Subject, tap, timer } from 'rxjs';
 import { environment } from '../../environments/environment.development';
+import { MessageService } from 'primeng/api';
 
 export enum GameErrorType {
   GENERAL_ERROR = 0,
@@ -110,26 +111,95 @@ export class WebSocketService {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class VersusSocket {
   private socket$: WebSocketSubject<any> | undefined;
 
   private SocketConnectedEvent: Subject<void> = new Subject<void>();
+  
+  private gameConnectionState$ = new BehaviorSubject<boolean>(false);
+  private listConnectionState$ = new BehaviorSubject<boolean>(false);
 
-  constructor() {}
+  private toastShowed: boolean = false;
+
+  constructor(private messageService: MessageService) {}
+
+  public isGameConnected(): boolean {
+    return this.gameConnectionState$.value;
+  }
+
+  public isListConnected(): boolean {
+    return this.listConnectionState$.value;
+  }
 
   onConnection(): Observable<void> {
     return this.SocketConnectedEvent.asObservable();
   }
 
   connectList(): void {
-    this.socket$ = webSocket(`${environment.WS_HOST}:${environment.WS_PORT}/versus/list`);
+    this.socket$ = webSocket(
+      {
+        url: `${environment.WS_HOST}:${environment.WS_PORT}/versus/list`,
+        openObserver: {
+          next: () => {
+            if (this.toastShowed) {
+              this.messageService.add({ severity: 'success', summary: 'Connesso', detail: 'Connessione al server ristabilita' });
+              this.toastShowed = false;
+            }
+            this.listConnectionState$.next(true);
+            this.SocketConnectedEvent.next();
+          }
+        },
+        closeObserver: {
+          next: () => {
+            this.listConnectionState$.next(false);
+          }
+        }
+      }
+    );
+    this.socket$.pipe(
+      retry({
+        delay: (error, retryCount) => {
+          this.messageService.add({ severity: 'error', summary: 'Errore', detail: 'Connessione al server assente' });
+          this.toastShowed = true;
+          this.listConnectionState$.next(false);
+          return timer(1000);
+        }
+      })
+    ).subscribe();
     this.SocketConnectedEvent.next();
   }
 
   connect(game_id: string): void {
-    this.socket$ = webSocket(`${environment.WS_HOST}:${environment.WS_PORT}/versus/${game_id}`);
+    this.socket$ = webSocket({
+      url: `${environment.WS_HOST}:${environment.WS_PORT}/versus/${game_id}`,
+      openObserver: {
+        next: () => {
+          if (this.toastShowed) {
+            this.messageService.add({ severity: 'success', summary: 'Connesso', detail: 'Connessione al server ristabilita' });
+            this.toastShowed = false;
+          }
+          this.gameConnectionState$.next(true);
+          this.SocketConnectedEvent.next();
+        }
+      },
+      closeObserver: {
+        next: () => {
+          this.gameConnectionState$.next(false);
+        }
+      }
+    });
+    this.socket$.pipe(
+      retry({
+        delay: (error, retryCount) => {
+          this.messageService.add({ severity: 'error', summary: 'Errore', detail: 'Connessione al server assente' });
+          this.toastShowed = true;
+          this.gameConnectionState$.next(false);
+          return timer(1000);
+        }
+      })
+    ).subscribe();
     this.SocketConnectedEvent.next();
   }
 

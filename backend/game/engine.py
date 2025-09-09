@@ -82,7 +82,7 @@ class Guess:
 
     def to_dict_public(self):
         return {
-            "word": ''.join(['     ' for _ in self.guess]),
+            "word": "".join(["     " for _ in self.guess]),
             "status": self.result,
         }
 
@@ -112,7 +112,7 @@ class VersusGame:
     def _touch(self):
         self._last_active = time.time()
 
-    def destroy(self):
+    def mark_as_ended(self):
         self.status = VersusGameStatus.FINISHED
 
     def start(self, user: User):

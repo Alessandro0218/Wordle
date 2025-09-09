@@ -10,6 +10,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Subscription } from 'rxjs';
 import { RippleModule } from 'primeng/ripple';
 import { Router } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-servers-list',
@@ -23,6 +25,7 @@ import { Router } from '@angular/router';
     ReactiveFormsModule,
     TooltipModule,
     RippleModule,
+    ToastModule,
   ],
   templateUrl: './servers-list.component.html',
   styleUrl: './servers-list.component.css'
@@ -47,6 +50,7 @@ export class ServersListComponent implements OnInit, OnDestroy {
   constructor(
     private versusService: VersusService,
     private router: Router,
+    private messageService: MessageService,
   ) {}
 
   currentGameStatus(state: number): string {

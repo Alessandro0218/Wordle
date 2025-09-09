@@ -6,6 +6,8 @@ import { DialogModule } from 'primeng/dialog';
 import { AuthChangedEvent, AuthService } from 'service/auth.service';
 import { GameChangedEvent, VersusService } from 'service/game.service';
 import { TooltipModule } from "primeng/tooltip";
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-versus',
@@ -13,7 +15,8 @@ import { TooltipModule } from "primeng/tooltip";
   imports: [
     CommonModule,
     DialogModule,
-    TooltipModule
+    TooltipModule,
+    ToastModule,
   ],
   templateUrl: './versus.component.html',
   styleUrl: './versus.component.css'
@@ -51,6 +54,7 @@ export class VersusComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
+    private messageService: MessageService, 
   ) { }
 
   get myGame(): Game {
@@ -159,6 +163,10 @@ export class VersusComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               this.shakeAnimation = false;
             }, 500);
+            break;
+          case GameChangedEvent.GameNotFound:
+            this.navigateToList();
+            this.messageService.add({ severity: 'error', summary: 'Errore', detail: 'La partita non esiste più' });
             break;
           default:
             break;
