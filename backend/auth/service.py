@@ -57,7 +57,7 @@ def callbackLogic(code: str):
         },
     )
 
-    response = RedirectResponse(url="http://localhost:4200/")
+    response = RedirectResponse(url="http://192.168.0.2:4200/")
     response.set_cookie(
         key="user_token",
         value=jwt_token,

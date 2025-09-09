@@ -27,8 +27,7 @@ def require_user_token(request: Request):
 @router.get("/discord/login")
 def login():
     return RedirectResponse(
-        url="https://discord.com/oauth2/authorize?client_id=1385329136553431050&response_type=code&redirect_uri="
-        "http%3A%2F%2Flocalhost%3A8000%2Fauth%2Fdiscord%2Fcallback&scope=identify"
+        url="https://discord.com/oauth2/authorize?client_id=1385329136553431050&response_type=code&redirect_uri=http%3A%2F%2F192.168.0.2%3A8000%2Fauth%2Fdiscord%2Fcallback&scope=identify"
     )
 
 
