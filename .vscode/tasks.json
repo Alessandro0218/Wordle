@@ -4,7 +4,7 @@
         {
             "label": "angular-start",
             "type": "shell",
-            "command": "ng serve",
+            "command": "ng serve --host 0.0.0.0 --disable-host-check",
             "options": {
                 "cwd": "${workspaceFolder}/frontend/wordui"
             },
