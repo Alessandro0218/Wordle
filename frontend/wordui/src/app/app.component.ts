@@ -46,7 +46,6 @@ export class AppComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private versusService: VersusService,
     private messageService: MessageService,
   ) {}
   
@@ -55,7 +54,7 @@ export class AppComponent implements OnInit {
       if (AuthChangedResult.event === AuthChangedEvent.UserDataFetched) {
         this.userData = new User().from_json(AuthChangedResult.data);
       } else if (AuthChangedResult.event === AuthChangedEvent.UserDataError) {
-        this.messageService.add({ severity: 'error', summary: 'Errore', detail: 'Errore nel recupero dei dati utente', life: 5000 });
+        /* this.messageService.add({ severity: 'error', summary: 'Errore', detail: 'Errore nel recupero dei dati utente', life: 5000 }); */
       } else if (AuthChangedResult.event === AuthChangedEvent.LoggedOut) {
         this.userData = new User();
       } else if (AuthChangedResult.event === AuthChangedEvent.LoggedOutError) {

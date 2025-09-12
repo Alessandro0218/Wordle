@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  wordui-frontend:
+    container_name: WordUI
+    environment:
+      HOST: ${APPLICATION_HOST}
+      PORT: ${APPLICATION_PORT}
+      WS_HOST: ${APPLICATION_WS_HOST}
+      WS_PORT: ${APPLICATION_WS_PORT}
+    build:
+      context: ./frontend/wordui
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    networks:
+      - wordle-network
+
+  fastapi-backend:
+    container_name: wordle-backend
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - wordle-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mysql-db:
+    image: mysql:8.1
+    container_name: wordle-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordle
+    # ports:
+    #   - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - wordle-network
+
+networks:
+  wordle-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

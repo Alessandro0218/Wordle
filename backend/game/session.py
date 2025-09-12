@@ -3,9 +3,9 @@ import time
 
 from pyee.asyncio import AsyncIOEventEmitter
 
-from backend.auth.domain import GameErrorType, User
-from backend.auth.service import get_user_data_from_token
-from backend.game.engine import GameEngine, VersusGame, VersusGameStatus
+from auth.domain import GameErrorType, User
+from auth.service import get_user_data_from_token
+from game.engine import GameEngine, VersusGame, VersusGameStatus
 
 events = AsyncIOEventEmitter()
 

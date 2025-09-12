@@ -1,11 +1,10 @@
 from typing import Dict
 
+from auth.domain import AuthenticatedUser
+from auth.jwt import verify_jwt_token
+from auth.service import get_user_data_from_token
 from fastapi import WebSocket
 from starlette.authentication import AuthCredentials, AuthenticationBackend
-
-from backend.auth.domain import AuthenticatedUser
-from backend.auth.jwt import verify_jwt_token
-from backend.auth.service import get_user_data_from_token
 
 
 class JWTAuthBackend(AuthenticationBackend):

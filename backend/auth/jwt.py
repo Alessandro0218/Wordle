@@ -18,6 +18,7 @@ def decode_jwt_token(token: str) -> dict:
 
 
 def verify_jwt_token(token: str) -> dict | None:
+    print(token)
     try:
         return decode_jwt_token(token)
     except jwt.ExpiredSignatureError:

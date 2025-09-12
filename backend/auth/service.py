@@ -1,11 +1,10 @@
 import os
 
 import requests
+from auth.database import Database
+from auth.domain import User
+from auth.jwt import create_jwt_token, verify_jwt_token
 from fastapi.responses import RedirectResponse
-
-from backend.auth.database import Database
-from backend.auth.domain import User
-from backend.auth.jwt import create_jwt_token, verify_jwt_token
 
 
 def callbackLogic(code: str):
@@ -57,7 +56,7 @@ def callbackLogic(code: str):
         },
     )
 
-    response = RedirectResponse(url="http://192.168.0.2:4200/")
+    response = RedirectResponse(url=f"http://{os.getenv('APPLICATION_HOST')}:{os.getenv('APPLICATION_EXPOSED_PORT')}/")
     response.set_cookie(
         key="user_token",
         value=jwt_token,
@@ -70,7 +69,10 @@ def callbackLogic(code: str):
 
 
 def get_user_data_from_token(token: str) -> User:
-    user_data = verify_jwt_token(token)
+    try:
+        user_data = verify_jwt_token(token)
+    except Exception as e:
+        raise ValueError(f"Token verification failed: {str(e)}")
     if not user_data:
         raise ValueError("Invalid or expired token")
     db = Database()

@@ -4,8 +4,8 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from backend.auth.domain import GameErrorType, User
-from backend.game.wordlist import (
+from auth.domain import GameErrorType, User
+from game.wordlist import (
     WordStatus,
     evaluate_guess,
     get_random_word,
