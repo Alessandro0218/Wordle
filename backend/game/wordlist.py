@@ -9,13 +9,13 @@ class WordStatus(Enum):
     INCORRECT_LENGTH = 4
 
 
-def get_random_word(file_path: str = "backend/data/words.txt") -> str:
+def get_random_word(file_path: str = "data/words.txt") -> str:
     with open(file_path, "r") as f:
         words = [line.strip() for line in f if line.strip()]
     return choice(words)
 
 
-def is_valid_word(word: str, file_path: str = "backend/data/words.txt") -> bool:
+def is_valid_word(word: str, file_path: str = "data/words.txt") -> bool:
     with open(file_path, "r") as f:
         words = {line.strip() for line in f if line.strip()}
     return word in words
