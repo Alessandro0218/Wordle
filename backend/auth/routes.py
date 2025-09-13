@@ -12,7 +12,6 @@ load_dotenv(dotenv_path=dotenv_path)
 
 def require_user_token(request: Request):
     token = request.cookies.get("user_token")
-    print(f"Token from cookie: {token}")
     if not token:
         return Response(status_code=401, content="Unauthorized: No token provided")
     try:
