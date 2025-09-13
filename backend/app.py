@@ -1,18 +1,15 @@
+from auth.connections import ConnectionManager, JWTAuthBackend
+from auth.domain import GameErrorType, User
+from auth.jwt import create_jwt_token, verify_jwt_token
+from auth.routes import router
+from auth.service import get_user_data_from_token
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from game.engine import CreateRoomRequest, EnterRoomRequest
+from game.session import SingleManager, VersusManager, events
 from starlette.middleware.authentication import AuthenticationMiddleware
 
-from backend.auth.connections import ConnectionManager, JWTAuthBackend
-from backend.auth.domain import GameErrorType, User
-from backend.auth.jwt import create_jwt_token, verify_jwt_token
-from backend.auth.routes import router
-from backend.auth.service import get_user_data_from_token
-from backend.game.engine import CreateRoomRequest, EnterRoomRequest
-from backend.game.session import SingleManager, VersusManager, events
-
-""" dotenv_path = os.path.join(os.path.dirname(__file__), "env", ".env")
-load_dotenv(dotenv_path=dotenv_path) """
 app = FastAPI()
 gameManager = SingleManager()
 versusManager = VersusManager()

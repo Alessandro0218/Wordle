@@ -1,13 +1,18 @@
+import os
+
+from auth.schemas import Base, UserORM
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.auth.schemas import Base, UserORM
+dotenv_path = os.path.join(os.path.dirname(__file__), "env", ".env")
+load_dotenv(dotenv_path=dotenv_path)
 
-DB_USER = "root"
-DB_PASSWORD = "root"
-DB_HOST = "localhost"
-DB_PORT = 3306
-DB_NAME = "wordle"
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "root")
+DB_HOST = os.getenv("DB_HOST", "mysql-db")
+DB_PORT = os.getenv("DB_PORT", "3306")
+DB_NAME = os.getenv("DB_NAME", "wordle")
 
 DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
@@ -69,7 +74,7 @@ class Database:
                 session.refresh(newUser)
             else:
                 self.update_user(discord_id=discord_id, user=userORM)
-            return existing_user
+            return self.get_user_by_discord_id(discord_id)
         except Exception as e:
             session.rollback()
             raise e

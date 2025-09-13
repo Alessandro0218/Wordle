@@ -27,6 +27,7 @@ class GameErrorType(IntEnum):
     NOT_SESSION_OWNER = 4
     GAME_ALREADY_FINISHED = 5
     INVALID_PLAYER = 6
+    GAME_NOT_ENDED = 7
 
 
 class AuthenticatedUser(BaseUser):

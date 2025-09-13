@@ -75,7 +75,7 @@ export class ServersListComponent implements OnInit, OnDestroy {
             this.servers = args.data;
             break;
           case GameChangedEvent.StartSuccess:
-            /* console.log(args.data); */
+            this.connectToServer(args.data.game_id);
             break;
           case GameChangedEvent.EnterSuccess:
             this.router.navigate(['/versus', args.data.game_id]);

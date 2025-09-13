@@ -9,6 +9,11 @@ export enum GameErrorType {
   GENERAL_ERROR = 0,
   SESSION_NOT_FOUND = 1,
   INVALID_WORD = 2,
+  PLAYER_ALREADY_EXISTS = 3,
+  NOT_SESSION_OWNER = 4,
+  GAME_ALREADY_FINISHED = 5,
+  INVALID_PLAYER = 6,
+  GAME_NOT_ENDED = 7
 }
 
 export enum GameActionType {
