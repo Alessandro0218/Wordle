@@ -2,15 +2,9 @@ import time
 import uuid
 from enum import Enum
 
-from pydantic import BaseModel
-
 from auth.domain import GameErrorType, User
-from game.wordlist import (
-    WordStatus,
-    evaluate_guess,
-    get_random_word,
-    is_valid_word,
-)
+from game.wordlist import WordStatus, evaluate_guess, get_random_word, is_valid_word
+from pydantic import BaseModel
 
 
 class GameStatus(Enum):
@@ -136,9 +130,6 @@ class VersusGame:
             self.status = VersusGameStatus.FINISHED
             self.winner = player
 
-        """ elif all(p.game.status != GameStatus.IN_PROGRESS for p in self.players.values()):
-            self.status = VersusGameStatus.FINISHED """
-
         return result
 
     def get_status(self, user: User):
@@ -151,6 +142,7 @@ class VersusGame:
                 player_state.to_json(public=player_state.player.discord_id != user.discord_id)
                 for player_state in self.players
             ],
+            "word": self.word if self.has_user_ended(user) else "",
             "max_players": self.max_players,
             "owner": self.owner.to_json(),
             "time_remaining": int(self.MAX_INACTIVITY_TIME - (time.time() - self._last_active)),
@@ -179,6 +171,13 @@ class VersusGame:
             if player_state.player.discord_id == user.discord_id:
                 player_state.ready = False
                 break
+
+    def has_user_ended(self, user: User) -> bool:
+        for player_state in self.players:
+            if player_state.player.discord_id == user.discord_id:
+                if player_state.game.status in [GameStatus.WON, GameStatus.LOST]:
+                    return True
+        return False
 
 
 class GameEngine:

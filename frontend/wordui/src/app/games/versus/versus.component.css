@@ -414,3 +414,7 @@
     text-align: center;
 }
 
+p.caps {
+    text-transform: uppercase;
+    font-size: 1.5rem;
+}

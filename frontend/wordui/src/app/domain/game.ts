@@ -189,6 +189,7 @@ export class VersusGame {
     status: number = 0;
     winner: User | undefined;
     players: PlayerState[] = [];
+    word: string = '';
     max_players: number = 0;
     owner: User | undefined;
 
@@ -200,6 +201,7 @@ export class VersusGame {
         this.players = json.players.map((player: User) => new PlayerState().from_json(player));
         this.max_players = json.max_players;
         this.owner = json.owner ? new User().from_json(json.owner) : undefined;
+        this.word = json.word;
         return this;
     }
 
@@ -211,7 +213,8 @@ export class VersusGame {
             winner: this.winner ? this.winner.to_json() : undefined,
             players: this.players.map(player => player.to_json()),
             max_players: this.max_players,
-            owner: this.owner ? this.owner.to_json() : undefined
+            owner: this.owner ? this.owner.to_json() : undefined,
+            word: this.word
         };
     }
 }
