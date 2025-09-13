@@ -1,8 +1,7 @@
 import os
 
-from dotenv import load_dotenv
-
 from auth.schemas import Base, UserORM
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -75,7 +74,7 @@ class Database:
                 session.refresh(newUser)
             else:
                 self.update_user(discord_id=discord_id, user=userORM)
-            return userORM
+            return self.get_user_by_discord_id(discord_id)
         except Exception as e:
             session.rollback()
             raise e
