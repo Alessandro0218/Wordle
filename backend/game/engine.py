@@ -213,7 +213,7 @@ class GameEngine:
     def get_status(self, public: bool = False):
         return {
             "game_id": self.game_id,
-            "word": self.word,
+            # "word": self.word, # DEBUG ONLY
             "guesses": [guess.to_dict_public() if public else guess.to_dict() for guess in self.guesses],
             "max_guess": self.max_guesses,
             "status": self.status.value,
