@@ -47,7 +47,9 @@ export class VersusComponent implements OnInit, OnDestroy {
 
   myGuesses: Guess[] = Array(this.MAX_GUESSES).fill(new Guess(' '.repeat(this.MAX_LENGTH), []));
 
+  canShowDialog: boolean = false;
   hideModal: boolean = false;
+
 
   constructor(
     private versusService: VersusService,
@@ -61,10 +63,10 @@ export class VersusComponent implements OnInit, OnDestroy {
     return this.game.players.find(p => p.Player.discord_id === this.myId)?.Game || new Game();
   }
   get isGameWon(): boolean {
-    return !this.hideModal && this.myGame.GameStatus === GameState.WON;
+    return this.canShowDialog && !this.hideModal && this.myGame.GameStatus === GameState.WON;
   }
   get isGameLost(): boolean {
-    return !this.hideModal && this.myGame.GameStatus === GameState.LOST;
+    return this.canShowDialog && !this.hideModal && this.myGame.GameStatus === GameState.LOST;
   }
   
   get currentIndex() {
@@ -153,10 +155,20 @@ export class VersusComponent implements OnInit, OnDestroy {
                 this.myGuesses[index] = guess;
               }
             });
+            if (this.myGame.GameStatus === GameState.WON || this.myGame.GameStatus === GameState.LOST) {
+              setTimeout(() => {
+                this.canShowDialog = true;
+              }, 2000);
+            }
             break;
           case GameChangedEvent.GuessSuccess:
             this.game = data;
             this.word = '';
+            if (this.myGame.GameStatus === GameState.WON || this.myGame.GameStatus === GameState.LOST) {
+              setTimeout(() => {
+                this.canShowDialog = true;
+              }, 2000);
+            }
             break;
           case GameChangedEvent.WordNotValid:
             this.shakeAnimation = true;
