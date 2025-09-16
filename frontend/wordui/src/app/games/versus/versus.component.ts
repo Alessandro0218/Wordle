@@ -50,6 +50,8 @@ export class VersusComponent implements OnInit, OnDestroy {
   canShowDialog: boolean = false;
   hideModal: boolean = false;
 
+  blockKeyboard: boolean = false;
+  slowInternetTimeout: any;
 
   constructor(
     private versusService: VersusService,
@@ -162,6 +164,8 @@ export class VersusComponent implements OnInit, OnDestroy {
             }
             break;
           case GameChangedEvent.GuessSuccess:
+            this.blockKeyboard = false;
+            clearTimeout(this.slowInternetTimeout);
             this.game = data;
             this.word = '';
             if (this.myGame.GameStatus === GameState.WON || this.myGame.GameStatus === GameState.LOST) {
@@ -263,6 +267,10 @@ export class VersusComponent implements OnInit, OnDestroy {
     }
     if (word && word.length === this.MAX_LENGTH) {
       this.versusService.postGuess(currentGameId, word.toLowerCase());
+      this.blockKeyboard = true;
+      this.slowInternetTimeout = setTimeout(() => {
+        this.messageService.add({ severity: 'error', summary: 'Internet', detail: 'Connessione rallentata!' });
+      }, 2000);
     } else {
       console.error('Invalid guess');
     }
