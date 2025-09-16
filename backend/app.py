@@ -97,7 +97,8 @@ async def versus_socket(websocket: WebSocket):
     @events.on("session_updated")
     async def handle_update(_):
         try:
-            await websocket.send_json({"action": "status", **session.get_status(user)})
+            for conn in connectionManager.get_connections(game_id):
+                await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
         except Exception:
             events.remove_listener("session_updated", handle_update)
 
@@ -144,9 +145,9 @@ async def versus_socket(websocket: WebSocket):
                 await websocket.send_json({"action": "error", "message": f"Unknown action: {action}"})
 
     except WebSocketDisconnect:
-        connectionManager.disconnect(game_id, websocket)
         versusManager.set_player_offline(user, game_id)
         versusManager.set_player_unready(user, game_id)
+        connectionManager.disconnect(game_id, websocket)
 
 
 @app.post("/versus/create")
