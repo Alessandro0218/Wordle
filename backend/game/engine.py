@@ -100,7 +100,7 @@ class VersusGame:
         self.owner: User = owner
         self.word: str = get_random_word()
         self.max_players: int = max_player
-        self.MAX_INACTIVITY_TIME = 5  # 600
+        self.MAX_INACTIVITY_TIME = 600
         self._last_active = time.time()
 
     def _touch(self):
