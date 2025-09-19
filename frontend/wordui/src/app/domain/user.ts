@@ -1,8 +1,8 @@
 export class User {
-    id: number | undefined;
-    discord_id: string | undefined;
-    discord_username: string | undefined;
-    discord_avatar: string | undefined;
+    id: number = 0;
+    discord_id: string = '';
+    discord_username: string = '';
+    discord_avatar: string = '';
 
     from_json(json: any): User {
         this.id = json.id;

@@ -24,48 +24,48 @@ export class AuthService {
   private DEFAULT_TIMEOUT = 5000;
   private onDataChangedEvent: Subject<AuthChangedResult> = new Subject<AuthChangedResult>();
 
-  private id: number | undefined;
-  private discord_id: string | undefined;
-  private discord_username: string | undefined;
-  private discord_avatar: string | undefined;
+  private id: number = 0;
+  private discord_id: string = '';
+  private discord_username: string = '';
+  private discord_avatar: string = '';
 
   get isLoggedIn(): boolean {
-    return this.Id !== undefined && this.DiscordUsername !== undefined && this.DiscordAvatar !== undefined;
+    return this.Id !== 0 && this.DiscordUsername !== '' && this.DiscordAvatar !== '';
   }
 
   constructor(
     private http: HttpClient,
   ) { }
 
-  get Id(): number | undefined {
+  get Id(): number {
     return this.id;
   }
 
-  get DiscordId(): string | undefined {
-    return this.discord_id ? this.discord_id : undefined;
+  get DiscordId(): string {
+    return this.discord_id ? this.discord_id : '';
   }
 
-  get DiscordUsername(): string | undefined {
+  get DiscordUsername(): string {
     return this.discord_username;
   }
 
-  get DiscordAvatar(): string | undefined {
+  get DiscordAvatar(): string {
     return this.discord_avatar;
   }
 
-  set Id(value: number | undefined) {
+  set Id(value: number) {
     this.id = value;
   }
 
-  set DiscordId(value: string | undefined) {
+  set DiscordId(value: string) {
     this.discord_id = value;
   }
 
-  set DiscordUsername(value: string | undefined) {
+  set DiscordUsername(value: string) {
     this.discord_username = value;
   }
 
-  set DiscordAvatar(value: string | undefined) {
+  set DiscordAvatar(value: string) {
     this.discord_avatar = value;
   }
 
@@ -81,10 +81,10 @@ export class AuthService {
   logout() {
     this.postLogoutRequest().subscribe({
       next: (result) => {
-        this.Id = undefined;
-        this.DiscordId = undefined;
-        this.DiscordUsername = undefined;
-        this.DiscordAvatar = undefined;
+        this.Id = 0;
+        this.DiscordId = '';
+        this.DiscordUsername = '';
+        this.DiscordAvatar = '';
         this.onDataChangedEvent.next({ event: AuthChangedEvent.LoggedOut, data: result });
       },
       error: (error) => {

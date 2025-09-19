@@ -12,6 +12,7 @@ import { RippleModule } from 'primeng/ripple';
 import { Router } from '@angular/router';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { AuthService } from 'service/auth.service';
 
 @Component({
   selector: 'app-servers-list',
@@ -37,7 +38,7 @@ export class ServersListComponent implements OnInit, OnDestroy {
   enterDialogVisibility: boolean = false;
 
   createRoom: FormGroup = new FormGroup({
-    name: new FormControl("GIGI server", [Validators.required]),
+    name: new FormControl(`${this.authService.DiscordUsername} game`, [Validators.required]),
     maxPlayers: new FormControl(2, [Validators.required]),
   });
 
@@ -48,6 +49,7 @@ export class ServersListComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
 
   constructor(
+    private authService: AuthService,
     private versusService: VersusService,
     private router: Router,
     private messageService: MessageService,
