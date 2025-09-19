@@ -186,6 +186,7 @@ export class PlayerState {
 export class VersusGame {
     action: string = '';
     game_id: string = '';
+    name: string = '';
     status: number = 0;
     winner: User | undefined;
     players: PlayerState[] = [];
@@ -196,6 +197,7 @@ export class VersusGame {
     from_json(json: any): VersusGame {
         this.action = json.action;
         this.game_id = json.game_id;
+        this.name = json.name;
         this.status = json.status;
         this.winner = json.winner ? new User().from_json(json.winner) : undefined;
         this.players = json.players.map((player: User) => new PlayerState().from_json(player));
@@ -209,6 +211,7 @@ export class VersusGame {
         return {
             action: this.action,
             game_id: this.game_id,
+            name: this.name,
             status: this.status,
             winner: this.winner ? this.winner.to_json() : undefined,
             players: this.players.map(player => player.to_json()),
