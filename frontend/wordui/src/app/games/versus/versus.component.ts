@@ -120,6 +120,7 @@ export class VersusComponent implements OnInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   handleKeydown(event: KeyboardEvent) {
+    if (this.myGame.GameStatus === GameState.WON || this.myGame.GameStatus === GameState.LOST || this.blockKeyboard) return;
     if (['Backspace', 'Enter'].includes(event.key)) {
       event.preventDefault();
     }
