@@ -152,6 +152,8 @@ export class VersusComponent implements OnInit, OnDestroy {
             this.navigateToList();
             break;
           case GameChangedEvent.StatusSuccess:
+            this.blockKeyboard = false;
+            clearTimeout(this.slowInternetTimeout);
             this.game = data;
             this.myGame.Guesses.forEach((guess, index) => {
               if (index !== this.currentIndex) {
@@ -176,12 +178,16 @@ export class VersusComponent implements OnInit, OnDestroy {
             }
             break;
           case GameChangedEvent.WordNotValid:
+            this.blockKeyboard = false;
+            clearTimeout(this.slowInternetTimeout);
             this.shakeAnimation = true;
             setTimeout(() => {
               this.shakeAnimation = false;
             }, 500);
             break;
           case GameChangedEvent.GameNotFound:
+            this.blockKeyboard = false;
+            clearTimeout(this.slowInternetTimeout);
             this.navigateToList();
             this.messageService.add({ severity: 'error', summary: 'Errore', detail: 'La partita non esiste più' });
             break;
@@ -266,7 +272,7 @@ export class VersusComponent implements OnInit, OnDestroy {
       console.error('Current guess control not found');
       return;
     }
-    if (word && word.length === this.MAX_LENGTH) {
+    if (word && word.length === this.MAX_LENGTH && !this.blockKeyboard) {
       this.versusService.postGuess(currentGameId, word.toLowerCase());
       this.blockKeyboard = true;
       this.slowInternetTimeout = setTimeout(() => {

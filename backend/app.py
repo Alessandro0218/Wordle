@@ -97,8 +97,7 @@ async def versus_socket(websocket: WebSocket):
     @events.on("session_updated")
     async def handle_update(_):
         try:
-            for conn in connectionManager.get_connections(game_id):
-                await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
+            await websocket.send_json({"action": "status", **session.get_status(user)})
         except Exception:
             events.remove_listener("session_updated", handle_update)
 
