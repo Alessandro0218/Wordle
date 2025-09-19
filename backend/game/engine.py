@@ -127,8 +127,9 @@ class VersusGame:
         result = player_game.game.make_guess(guess)
 
         if player_game.game.status == GameStatus.WON:
-            self.status = VersusGameStatus.FINISHED
-            self.winner = player
+            if not self.winner:
+                self.status = VersusGameStatus.FINISHED
+                self.winner = player
 
         return result
 
