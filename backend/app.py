@@ -37,6 +37,37 @@ def read_root():
 # Multi Player
 
 
+@events.on("session_updated")
+async def handle_list_update(sessions: list[str]):
+    try:
+        for conn in connectionManager.get_connections("guest"):
+            await conn.send_json(
+                {
+                    "action": "list",
+                    "data": [
+                        session.get_status(conn.user.user_model)
+                        for x in sessions
+                        if (session := versusManager.get_session(x)) is not None
+                    ],
+                }
+            )
+    except Exception:
+        events.remove_listener("session_updated", handle_list_update)
+
+
+@events.on("session_updated")
+async def handle_game_update(sessions: list[str]):
+    try:
+        for game_id in sessions:
+            session = versusManager.get_session(game_id)
+            if not session:
+                continue
+            for conn in connectionManager.get_connections(game_id):
+                await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
+    except Exception:
+        events.remove_listener("session_updated", handle_game_update)
+
+
 @app.websocket("/versus/list")
 async def list_versus_games(websocket: WebSocket):
     def get_sessions():
@@ -50,17 +81,9 @@ async def list_versus_games(websocket: WebSocket):
     await connectionManager.connect("guest", websocket)
     await websocket.send_json({"action": "list", "data": get_sessions()})
 
-    @events.on("session_updated")
-    async def handle_update(_):
-        try:
-            await websocket.send_json({"action": "list", "data": get_sessions()})
-        except Exception:
-            events.remove_listener("session_updated", handle_update)
-
     try:
         await websocket.receive_text()
     except WebSocketDisconnect:
-        events.remove_listener("session_updated", handle_update)
         connectionManager.disconnect("guest", websocket)
 
 
@@ -93,13 +116,6 @@ async def versus_socket(websocket: WebSocket):
         await websocket.send_json({"action": "error", "error": str(e)})
         await websocket.close()
         return
-
-    @events.on("session_updated")
-    async def handle_update(_):
-        try:
-            await websocket.send_json({"action": "status", **session.get_status(user)})
-        except Exception:
-            events.remove_listener("session_updated", handle_update)
 
     versusManager.set_player_online(user, game_id)
 

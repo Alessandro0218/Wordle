@@ -40,3 +40,8 @@ class ConnectionManager:
             self.active_connections[game_id] = [conn for conn in self.active_connections[game_id] if conn != websocket]
             if not self.active_connections[game_id]:
                 self.active_connections.pop(game_id)
+
+    async def broadcast(self, game_id: str, message: dict):
+        if game_id in self.active_connections:
+            for connection in self.active_connections[game_id]:
+                await connection.send_json(message)

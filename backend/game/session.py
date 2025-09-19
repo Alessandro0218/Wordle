@@ -43,12 +43,11 @@ class VersusManager:
                 await asyncio.sleep(5)
                 continue
             await asyncio.sleep(1)
-            for session in self.sessions.values():
+            for session in list(self.sessions.values()):
                 if all(not p.online for p in session.players):
                     if session.status == VersusGameStatus.FINISHED:
-                        self.remove_session(session.game_id)
-                        continue
-                    if time.time() - session._last_active > session.MAX_INACTIVITY_TIME:
+                        self.remove_session(session.game_id, False)
+                    elif time.time() - session._last_active > session.MAX_INACTIVITY_TIME:
                         session.mark_as_ended()
                 else:
                     session._touch()
@@ -94,11 +93,12 @@ class VersusManager:
     def get_session(self, game_id: str) -> VersusGame | None:
         return self.sessions.get(game_id)
 
-    def remove_session(self, game_id: str) -> VersusGame | None:
+    def remove_session(self, game_id: str, returnValue: bool = True) -> VersusGame | None:
         session = self.sessions.pop(game_id, None)
         if session:
             events.emit("session_updated", self.list_sessions())
-        return session
+        if returnValue:
+            return session
 
     def list_sessions(self):
         return list(self.sessions)
