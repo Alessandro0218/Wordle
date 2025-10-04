@@ -23,6 +23,7 @@ export enum GameActionType {
   LIST = 'list',
   START = 'start',
   TOGGLE_READY = 'toggle_ready',
+  GIVE_UP = 'give_up',
 }
 
 export class GameActionPayload {

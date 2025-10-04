@@ -2,7 +2,7 @@
     @for (friend of friends; track $index) {
         <div class="friends">
             <div class="friend-header">
-                <div class="friend-username">{{ friend.Player.discord_username }}</div>
+                <div class="friend-username" [ngStyle]="{'opacity': friend.Online ? 1 : 0.5, 'color': friend.Game.GameStatus === GameState.LOST ? 'red' : null}">{{ friend.Player.discord_username }}</div>
             </div>
             <div class="friend-grid">
                 @for (guess of friendsRows(friend); track guess; let guessIndex = $index) {
@@ -17,6 +17,7 @@
     }
 </div>
 <div class="col">
+    <button class="give-up-button" (click)="giveUp()">Arrenditi</button>
     <div class="grid" [ngStyle]="{'grid-template-rows': 'repeat(' + MAX_GUESSES + ', 1fr)'}">
         <div 
             class="game-row" 

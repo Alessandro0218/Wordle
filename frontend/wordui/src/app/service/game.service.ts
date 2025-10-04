@@ -216,10 +216,10 @@ export class VersusService {
 
   createRoom(name: string, max_players: number): void {
     this.postCreateRequest(name, max_players).subscribe({
-      next: (result) => {
+      next: (result: GameChangedResult) => {
         this.onDataChangedEvent.next(result);
       },
-      error: (error) => {
+      error: (error: GameChangedResult) => {
         this.onDataChangedEvent.next(error);
       }
     });
@@ -227,11 +227,11 @@ export class VersusService {
 
   enterRoom(code: string): void {
     this.postEnterRequest(code).subscribe({
-      next: (result) => {
+      next: (result: GameChangedResult) => {
         this.joinRoomEvent.next(result.data);
         this.onDataChangedEvent.next(result);
       },
-      error: (error) => {
+      error: (error: GameChangedResult) => {
         this.onDataChangedEvent.next(error);
       }
     });
@@ -257,6 +257,11 @@ export class VersusService {
 
   postGuess(game_id: string, guess: string): void {
     const action = new GameAction(GameActionType.GUESS, new GameActionPayload(guess));
+    this.versusSocket.send(action);
+  }
+
+  giveUp(): void {
+    const action = new GameAction(GameActionType.GIVE_UP);
     this.versusSocket.send(action);
   }
 

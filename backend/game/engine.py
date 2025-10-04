@@ -180,6 +180,14 @@ class VersusGame:
                     return True
         return False
 
+    def give_up(self, user: User):
+        for player_state in self.players:
+            if player_state.player.discord_id == user.discord_id:
+                player_state.game.status = GameStatus.LOST
+                if all(p.game.status in [GameStatus.WON, GameStatus.LOST] for p in self.players):
+                    self.status = VersusGameStatus.FINISHED
+                break
+
 
 class GameEngine:
     games = []

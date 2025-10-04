@@ -22,7 +22,8 @@ import { MessageService } from 'primeng/api';
   styleUrl: './versus.component.css'
 })
 export class VersusComponent implements OnInit, OnDestroy {
-
+  GameState = GameState;
+  
   visible: boolean = true;
   game: VersusGame = new VersusGame();
 
@@ -90,7 +91,8 @@ export class VersusComponent implements OnInit, OnDestroy {
   }
 
   get friends(): PlayerState[] {
-    return this.game.players.filter(p => p.Player.discord_id !== this.myId && p.Online);
+    if (!this.game.players) return [];
+    return this.game.players.filter(p => p.Player.discord_id !== this.myId);
   }
 
   friendsRows(friend: PlayerState): number[] {
@@ -334,5 +336,9 @@ export class VersusComponent implements OnInit, OnDestroy {
 
   navigateToList() {
     this.router.navigate(['/servers-list']);
+  }
+
+  giveUp() {
+    this.versusService.giveUp();
   }
 }

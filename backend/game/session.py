@@ -130,3 +130,10 @@ class VersusManager:
             return
         session.set_player_unready(user)
         events.emit("game_updated", self.list_sessions())
+
+    def give_up(self, user: User, game_id):
+        session = self.sessions.get(game_id)
+        if not session:
+            return
+        session.give_up(user)
+        events.emit("game_updated", self.list_sessions())
