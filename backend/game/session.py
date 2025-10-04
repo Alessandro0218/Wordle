@@ -65,7 +65,7 @@ class VersusManager:
         if not session:
             raise ValueError(GameErrorType.SESSION_NOT_FOUND)
         if session.owner == user:
-            events.emit("session_updated", self.list_sessions())
+            events.emit("game_updated", self.list_sessions())
             return session.start(user)
         else:
             raise ValueError(GameErrorType.NOT_SESSION_OWNER)
@@ -87,7 +87,7 @@ class VersusManager:
         if not session:
             raise ValueError(GameErrorType.SESSION_NOT_FOUND)
         result = session.make_guess(user, guess)
-        events.emit("session_updated", self.list_sessions())
+        events.emit("game_updated", self.list_sessions())
         return result
 
     def get_session(self, game_id: str) -> VersusGame | None:
@@ -96,7 +96,7 @@ class VersusManager:
     def remove_session(self, game_id: str, returnValue: bool = True) -> VersusGame | None:
         session = self.sessions.pop(game_id, None)
         if session:
-            events.emit("session_updated", self.list_sessions())
+            events.emit("game_updated", self.list_sessions())
         if returnValue:
             return session
 
@@ -108,25 +108,25 @@ class VersusManager:
         if not session:
             return
         session.set_player_offline(user)
-        events.emit("session_updated", self.list_sessions())
+        events.emit("game_updated", self.list_sessions())
 
     def set_player_online(self, user: User, game_id):
         session = self.sessions.get(game_id)
         if not session:
             return
         session.set_player_online(user)
-        events.emit("session_updated", self.list_sessions())
+        events.emit("game_updated", self.list_sessions())
 
     def toggle_player_ready(self, user: User, game_id):
         session = self.sessions.get(game_id)
         if not session:
             return
         session.toggle_player_ready(user)
-        events.emit("session_updated", self.list_sessions())
+        events.emit("game_updated", self.list_sessions())
 
     def set_player_unready(self, user: User, game_id):
         session = self.sessions.get(game_id)
         if not session:
             return
         session.set_player_unready(user)
-        events.emit("session_updated", self.list_sessions())
+        events.emit("game_updated", self.list_sessions())

@@ -1,2 +1,5 @@
-syncronizzazione se uno si disconnette - da vedere se sistemato
+bug che non aggiorna correttamente
+disconnettere le persone che "rimangono" dentro una stanza per inattività
 tasto arrenditi
+tasto torna al menu
+mostrare quando uno scrive

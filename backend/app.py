@@ -52,10 +52,11 @@ async def handle_list_update(sessions: list[str]):
                 }
             )
     except Exception:
-        events.remove_listener("session_updated", handle_list_update)
+        # events.remove_listener("session_updated", handle_list_update)
+        pass
 
 
-@events.on("session_updated")
+@events.on("game_updated")
 async def handle_game_update(sessions: list[str]):
     try:
         for game_id in sessions:
@@ -65,7 +66,8 @@ async def handle_game_update(sessions: list[str]):
             for conn in connectionManager.get_connections(game_id):
                 await conn.send_json({"action": "status", **session.get_status(conn.user.user_model)})
     except Exception:
-        events.remove_listener("session_updated", handle_game_update)
+        # events.remove_listener("game_updated", handle_game_update)
+        pass
 
 
 @app.websocket("/versus/list")
@@ -132,6 +134,7 @@ async def versus_socket(websocket: WebSocket):
                     versusManager.start_session(user, game_id)
                 except Exception as e:
                     await websocket.send_json({"action": "error", "error": str(e)})
+                    return
 
             elif action == "guess":
                 try:
